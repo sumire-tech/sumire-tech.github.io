@@ -75,6 +75,41 @@
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
       text-align: center;
     }
+
+        /* 近況セクション */
+    .status-section {
+      margin-top: 40px;
+    }
+
+    .status-section h2 {
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+    }
+
+    .status-card {
+      background-color: white;
+      border-radius: 15px;
+      padding: 1.2rem;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .status-date {
+      position: absolute;
+      top: 1rem;
+      left: 1.2rem;
+      font-size: 0.9rem;
+      color: #888;
+    }
+
+    .status-text {
+      padding-left: 5rem;
+      font-size: 1.05rem;
+      line-height: 1.6;
+      color: #333;
+    }
+
   </style>
 </head>
 <body>
@@ -88,16 +123,15 @@
     <div class="profile-card">
       <h1>Nakagawa Sumire</h1>
       <p>
-        B1.人工知能,特に複数モダリティによる言語処理（マルチモーダルLM）に興味があります.<br>
-        多趣味で,以下のようなことが好きです.<br>
-        音楽全般（ピアノ・バイオリン演奏, ボカロ,ケルト音楽,クラシック,ゲームミュージック）,イラスト製作,(純粋）数学等.<br>
-        
+        B1. 人工知能, 特に複数モダリティによる言語処理（マルチモーダルLM）に興味があります.<br>
+        好きなもの：音楽全般（ボカロ,ケルト音楽,クラシック,ゲームミュージック）,イラスト製作,数学,北欧猫.<br>
+        最近はp5.js（ジェネラティブアート）の作品制作,pytorchや視覚言語モデル関連の勉強などをしています.
       </p>
     </div>
 
     <!-- My Works -->
     <div class="works-section">
-      <h2>My Works</h2>
+      <h2>My Works(準備中）</h2>
       <div class="works-grid">
         <div class="work-card">Work 1</div>
         <div class="work-card">Work 2</div>
@@ -106,6 +140,26 @@
         <!-- 必要に応じて追加可能 -->
       </div>
     </div>
+
+        <!-- 近況 -->
+    <div class="status-section">
+      <h2>近況</h2>
+      <div class="status-card">
+        <div class="status-date">8月6日</div>
+        <div class="status-text">
+          test<br>
+          test
+        </div>
+      </div>
+      <div class="status-card">
+        <div class="status-date">8月4日</div>
+        <div class="status-text">
+          test2<br>
+          test2
+        </div>
+      </div>
+    </div>
+
   </div>
 
 </body>

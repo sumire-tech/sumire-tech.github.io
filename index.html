@@ -10,7 +10,7 @@
       background-color: #f5f5f5;
     }
 
-    
+    /* ナビバー */
     header {
       position: fixed;
       top: 0;
@@ -20,24 +20,25 @@
       padding: 1rem 2rem;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-start;
       z-index: 1000;
+      font-size: 1.2rem;
     }
 
-    
+    /* 全体の余白 */
     .container {
       max-width: 900px;
       margin: 120px auto 40px;
       padding: 0 20px;
     }
 
-    
+    /* プロフィールカード */
     .profile-card {
       background-color: white;
       border-radius: 15px;
       padding: 2rem;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      text-align: center;
+      text-align: left; /* ← 左詰に変更 */
       margin-bottom: 40px;
     }
 
@@ -79,15 +80,22 @@
 <body>
 
   <header>
-    <div>My Homepage</div>
+    My Homepage
   </header>
 
   <div class="container">
+    <!-- プロフィール -->
     <div class="profile-card">
       <h1>Nakagawa Sumire</h1>
-      <p>ouc B1</p>
+      <p>
+        B1.人工知能,特に複数モダリティによる言語処理（マルチモーダルLM）に興味があります.<br>
+        多趣味で,以下のようなことが好きです.<br>
+        音楽全般（ピアノ・バイオリン演奏, ボカロ,ケルト音楽,クラシック,ゲームミュージック）,イラスト製作,(純粋）数学等.<br>
+        
+      </p>
     </div>
 
+    <!-- My Works -->
     <div class="works-section">
       <h2>My Works</h2>
       <div class="works-grid">
@@ -95,7 +103,7 @@
         <div class="work-card">Work 2</div>
         <div class="work-card">Work 3</div>
         <div class="work-card">Work 4</div>
-        <!-- 必要に応じて増やしてOK -->
+        <!-- 必要に応じて追加可能 -->
       </div>
     </div>
   </div>

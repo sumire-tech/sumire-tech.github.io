@@ -63,13 +63,130 @@
   </div>
 
   <h1>FFT解析によるp5.jsでの波形表示</h1>
-  <p>このページでは、FFT解析を使って音楽の波形を可視化するp5.jsの作品を紹介しています。</p>
+  <p>FFT解析を使って音楽の波形を可視化するp5.jsの作品製作しました。<br>製作にあたっては、ChatGPTを利用しています。</p>
 
   <video controls>
     <source src="https://sumire-tech.github.io/sharou_fft.mp4" type="video/mp4" />
     お使いのブラウザは動画タグに対応していません。
   </video>
 
-  <p>（音が出ますので音量にご注意ください）</p>
+  <p>（音が出ます。最大音量まで大きくしないと聞こえないかと思います）</p>
+  <!-- videoタグのあとに追加 -->
+
+<!-- コードブロック表示 -->
+  <pre style="background:#272822; color:#f8f8f2; padding:1em; border-radius:8px; overflow-x:auto; font-family: 'Courier New', Courier, monospace; font-size:0.9rem; line-height:1.4;">
+  <span style="color:#66d9ef;">//music : Anyone in 2025 しゃろう様</span>
+
+  <span style="color:#f92672;">let</span> sound;
+  <span style="color:#f92672;">let</span> fft;
+  <span style="color:#f92672;">const</span> numLines = 256;
+  <span style="color:#f92672;">let</span> baseRadius = 150;
+
+  <span style="color:#f92672;">let</span> particles = [];
+  <span style="color:#f92672;">const</span> numParticles = 200;
+
+  <span style="color:#f92672;">let</span> waveform = [];
+
+  <span style="color:#66d9ef;">function</span> preload() {
+    sound = loadSound(<span style="color:#e6db74;">'Anyone_in_2025_trim.wav'</span>);
+  }
+
+  <span style="color:#66d9ef;">function</span> setup() {
+    createCanvas(640, 640);
+    angleMode(DEGREES);
+    colorMode(HSL);
+    <mark style="background:#49483e; color:#a6e22e;">fft = new p5.FFT();</mark>
+    sound.loop();
+
+    <span style="color:#f92672;">for</span> (<span style="color:#f92672;">let</span> i = 0; i &lt; numParticles; i++) {
+      particles.push({
+        angle: random(360),
+        radius: random(baseRadius + 30, baseRadius + 100),
+        size: random(1, 3),
+        speed: random(0.1, 0.5),
+        hue: random(180, 220),
+        lightness: random(50, 70),
+        flicker: random(0.5, 1.5),
+      });
+    }
+  }
+
+  <span style="color:#66d9ef;">function</span> draw() {
+    background(0, 150);
+
+    translate(width / 2, height / 2);
+
+    <mark style="background:#49483e; color:#a6e22e;">
+    <span style="color:#f92672;">if</span> (frameCount % 8 === 0) {
+      waveform = fft.waveform(numLines);
+    }
+    </mark>
+
+    <span style="color:#f92672;">let</span> rotation = frameCount * 0.3;
+
+    strokeWeight(2);
+    noFill();
+
+    <span style="color:#f92672;">for</span> (<span style="color:#f92672;">let</span> i = 0; i &lt; numLines; i++) {
+      <span style="color:#f92672;">let</span> angle = map(i, 0, numLines, 0, 360) + rotation;
+
+      <span style="color:#f92672;">let</span> gradientPos = (i + frameCount * 0.2) % 60;
+      <span style="color:#f92672;">let</span> lightness = 40 + 40 * sin(map(gradientPos, 0, 60, 0, 360));
+
+      <span style="color:#f92672;">let</span> amp = waveform.length &gt; 0 ? waveform[i] : 0;
+      <span style="color:#f92672;">let</span> len = baseRadius + amp * 100;
+
+      <span style="color:#f92672;">if</span> (amp &gt; 0.3) {
+
+        drawingContext.shadowBlur = 30;
+        drawingContext.shadowColor = <span style="color:#e6db74;">'rgba(255, 255, 255, 0.9)'</span>;
+        stroke(255, 255, 255);
+      } <span style="color:#f92672;">else</span> {
+
+        drawingContext.shadowBlur = 15;
+        drawingContext.shadowColor = <span style="color:#e6db74;">'rgba(60, 120, 180, 0.7)'</span>;
+        stroke(<span style="color:#a6e22e;">`hsl(200, 100%, ${lightness}%)`</span>);
+      }
+
+      <span style="color:#f92672;">let</span> x1 = baseRadius * cos(angle);
+      <span style="color:#f92672;">let</span> y1 = baseRadius * sin(angle);
+      <span style="color:#f92672;">let</span> x2 = len * cos(angle);
+      <span style="color:#f92672;">let</span> y2 = len * sin(angle);
+
+      line(x1, y1, x2, y2);
+    }
+
+    drawingContext.shadowBlur = 0;
+
+    colorMode(HSL);
+    noStroke();
+    <span style="color:#f92672;">for</span> (<span style="color:#f92672;">let</span> p <span style="color:#f92672;">of</span> particles) {
+      p.angle += p.speed;
+      <span style="color:#f92672;">if</span> (p.angle &gt; 360) p.angle -= 360;
+
+      <span style="color:#f92672;">let</span> waveIndex = floor(map(p.angle, 0, 360, 0, waveform.length - 1));
+      <span style="color:#f92672;">let</span> waveVal = waveform.length &gt; 0 ? waveform[waveIndex] : 0;
+      <span style="color:#f92672;">let</span> dynamicRadius = p.radius + waveVal * 30 * p.flicker;
+
+      <span style="color:#f92672;">let</span> x = dynamicRadius * cos(p.angle);
+      <span style="color:#f92672;">let</span> y = dynamicRadius * sin(p.angle);
+
+      fill(p.hue, 100, p.lightness, 0.7);
+      ellipse(x, y, p.size);
+
+      <span style="color:#f92672;">if</span> (random() &lt; 0.03) {
+        fill(180, 100, 90, 1);
+        ellipse(x, y, p.size * 2);
+      }
+    }
+  }
+
+  <span style="color:#66d9ef;">function</span> mousePressed() {
+    <span style="color:#f92672;">if</span> (!sound.isPlaying()) {
+      sound.loop();
+    }
+  }
+  </pre>
+
 </body>
 </html>

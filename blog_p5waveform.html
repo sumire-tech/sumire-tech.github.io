@@ -63,7 +63,7 @@
   </div>
 
   <h1>p5.jsでの音楽と連動した波形アニメーション</h1>
-  <p>音声ファイルから。<br>製作にあたっては、ChatGPTを利用しています。</p>
+  <p>音声ファイルから波形情報を取得し、放射状の直線の変化に反映させています。<br>なお、製作にあたってはChatGPTを利用しました。</p>
 
   <video controls>
     <source src="https://sumire-tech.github.io/sharou_fft.mp4" type="video/mp4" />
@@ -185,6 +185,19 @@
     }
   }
   </pre>
+
+  <p>p5.jsは、音声処理に関する機能が多く含まれており（p5.sound）、p5.FFTというオブジェクトが存在します。
+  <br>このオブジェクトには、振幅を返すfft.waveform()と、周波数を返すfft.analyze()の２種類があり、今回は振幅の情報を利用しました。
+  <br>FFT(高速フーリエ変換)は、波形内の個々のオーディオ周波数を分離する解析アルゴリズムです。これについては理解するのが難しいので、以下に解説されている方の記事を貼っておきます。私もいつか理解したい...。</p>
+  <a href="https://qiita.com/ageprocpp/items/0d63d4ed80de4a35fe79" target="_blank" rel="noopener noreferrer">FFT（高速フーリエ変換）を完全に理解する話</a>
+
+  <br>
+
+  <p>また、以下のサイトも面白いので、興味がある方は訪れてみると良いかもしれません。</p>
+  <a href="https://himco.jp/2020/01/09/4%EF%BC%9A%E3%82%B5%E3%82%A6%E3%83%B3%E3%83%89%E3%81%AE%E5%8A%A0%E5%B7%A5%E3%80%81%E4%BD%9C%E6%88%90-p5-sound-js-%E3%82%B5%E3%82%A6%E3%83%B3%E3%83%89/" target="_blank" rel="noopener noreferrer">4：サウンドの作成と加工(エンベロープ) p5.sound.js サウンド</a>
+  <a href="https://therewasaguy.github.io/p5-music-viz/" target="_blank" rel="noopener noreferrer">Visualizing Music with p5.js</a>
+
+
 
   
 

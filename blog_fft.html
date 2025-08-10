@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>FFT解析によるp5.jsでの波形表示</title>
+  <title>p5.jsでの音楽と連動した波形アニメーション</title>
   <style>
     body {
       margin: 0;
@@ -62,8 +62,8 @@
     </svg>
   </div>
 
-  <h1>FFT解析によるp5.jsでの波形表示</h1>
-  <p>FFT解析を使って音楽の波形を可視化するp5.jsの作品製作しました。<br>製作にあたっては、ChatGPTを利用しています。</p>
+  <h1>p5.jsでの音楽と連動した波形アニメーション</h1>
+  <p>音声ファイルから。<br>製作にあたっては、ChatGPTを利用しています。</p>
 
   <video controls>
     <source src="https://sumire-tech.github.io/sharou_fft.mp4" type="video/mp4" />
@@ -71,7 +71,7 @@
   </video>
 
   <p>（音が出ます。最大音量まで大きくしないと聞こえないかと思います）</p>
-  <p>以下は、p5.jsのコードです。灰色部分でFFT解析に関する操作をしています。（fft.waveformで音声波形の情報を取得しています）</p>
+  <p>以下は、p5.jsのコードです。</p>
 
 <!-- コードブロック表示 -->
   <pre style="background:#272822; color:#f8f8f2; padding:1em; border-radius:8px; overflow-x:auto; font-family: 'Courier New', Courier, monospace; font-size:0.9rem; line-height:1.4;">
@@ -95,7 +95,7 @@
     createCanvas(640, 640);
     angleMode(DEGREES);
     colorMode(HSL);
-    <mark style="background:#49483e; color:#a6e22e;">fft = new p5.FFT();</mark>
+    fft = new p5.FFT();
     sound.loop();
 
     <span style="color:#f92672;">for</span> (<span style="color:#f92672;">let</span> i = 0; i &lt; numParticles; i++) {
@@ -116,11 +116,9 @@
 
     translate(width / 2, height / 2);
 
-    <mark style="background:#49483e; color:#a6e22e;">
     <span style="color:#f92672;">if</span> (frameCount % 8 === 0) {
       waveform = fft.waveform(numLines);
     }
-    </mark>
 
     <span style="color:#f92672;">let</span> rotation = frameCount * 0.3;
 

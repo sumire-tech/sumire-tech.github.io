@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>BlackJack</title>
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Roboto:wght@400;700&display=swap');
+
+[v-cloak]{display:none;}
+body{
+    margin:0;padding:0;
+    font-family:'Roboto',sans-serif;
+    background-color:#121212;color:#f5f5f5;
+    display:flex;justify-content:center;align-items:center;height:100vh;
+}
+#app{
+    text-align:center;
+    background:#1e1e1e;
+    padding:2.5rem 3rem;
+    border-radius:16px;
+    box-shadow:0 0 25px rgba(0,0,0,0.6);
+    width:420px;
+    border:1px solid #2e2e2e;
+}
+h2{color:#f5f5f5;margin-bottom:1.8rem;font-size:1.8rem;letter-spacing:1px;font-weight:700;}
+.stages{margin-top:1rem;}
+.stages button{font-family:'Orbitron',sans-serif;letter-spacing:1px;font-size:1.1rem;}
+input{
+    width:80%;padding:0.7rem;margin-bottom:1.2rem;
+    border:none;border-radius:8px;background:#2a2a2a;color:#f5f5f5;font-size:1rem;text-align:center;outline:none;border:1px solid #444;
+}
+button{
+    padding:0.8rem 1.4rem;margin:0.4rem;border:none;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;transition:all 0.25s ease;
+}
+button:not(:disabled){background:linear-gradient(145deg,#27ae60,#219150);color:#fff;}
+button:not(:disabled):hover{background:linear-gradient(145deg,#2ecc71,#27ae60);transform:translateY(-2px) scale(1.05);}
+button:disabled{background:#2a2a2a;color:#777;cursor:not-allowed;}
+p{margin-top:1rem;font-size:0.95rem;color:#bbb;}
+.stage-select-container{position:relative;padding:20px;}
+.user-info{position:absolute;top:10px;right:10px;text-align:right;}
+.user-info button{padding:0.3rem 0.6rem;font-size:0.8rem;} /* 小さめ調整 */
+.cards{display:flex;justify-content:center;gap:0.4rem;margin-bottom:0.6rem;}
+.card{padding:0.3rem 0.5rem;border-radius:6px;background:#333;color:#fff;font-weight:700;}
+.export-button{margin-top:10px;}
+</style>
+</head>
+<body>
+<div id="app" v-cloak>
+    <!-- ユーザー登録 -->
+    <div v-if="currentPage==='register'">
+        <h2>ユーザー登録</h2>
+        <input v-model="username" placeholder="ユーザー名">
+        <button @click="registerUser">登録</button>
+        <p>{{ message }}</p>
+    </div>
+
+    <!-- ステージ選択 -->
+    <div v-if="currentPage==='stageSelect'" class="stage-select-container">
+        <div class="user-info">
+            <p>{{ username }}さん</p>
+            <button @click="deleteUser">削除</button>
+        </div>
+        <h2>ステージ選択</h2>
+        <div class="stages">
+            <button v-for="stage in 9" :key="stage" :disabled="!stages[stage]" @click="selectStage(stage)">
+                {{ stage }} <span v-if="!stages[stage]">🔒</span>
+            </button>
+        </div>
+        <div class="export-button">
+            <button @click="exportUserData">結果出力</button>
+        </div>
+    </div>
+
+    <!-- ゲーム画面 -->
+    <div v-if="currentPage==='game'">
+        <h2>Stage {{ selectedStage }}</h2>
+        <div class="dealer">
+            <h3>Dealer <span class="life">{{ '❤️'.repeat(dealerLife) }}</span></h3>
+            <div class="cards">
+                <span v-for="(card,i) in dealerCards" :key="i" class="card">{{ card }}</span>
+            </div>
+            <p v-if="roundOver">Score: {{ dealerTotal }}</p>
+        </div>
+        <div class="player">
+            <h3>{{ username }} <span class="life">{{ '❤️'.repeat(playerLife) }}</span></h3>
+            <div class="cards">
+                <span v-for="(card,i) in playerCards" :key="i" class="card">{{ card }}</span>
+            </div>
+            <p>Score: {{ playerTotal }}</p>
+        </div>
+
+        <div class="actions">
+            <button @click="hit" :disabled="roundOver || gameOver">Hit</button>
+            <button @click="stand" :disabled="roundOver || gameOver">Stand</button>
+        </div>
+
+        <div class="result" v-if="roundOver && !stageCleared && !gameOver">
+            <p>{{ resultMessage }}</p>
+            <button v-if="!gameOver" @click="nextRound">次のラウンド</button>
+        </div>
+
+        <div class="stage-cleared" v-if="stageCleared">
+            <p>{{ resultMessage }}</p>
+            <button @click="backToStageSelect">ステージ選択に戻る</button>
+        </div>
+
+        <div class="game-over" v-if="gameOver">
+            <p>GameOver ライフが0になりました。</p>
+            <button @click="backToStageSelect">ステージ選択に戻る</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const { createApp, reactive, toRefs } = Vue;
+
+createApp({
+    setup(){
+        const state = reactive({
+            currentPage:'register',
+            username:'',
+            message:'',
+            stages:{},
+            selectedStage:null,
+            deck:[], dealerCards:[], playerCards:[],
+            dealerTotal:0, playerTotal:0,
+            roundOver:false, gameOver:false, resultMessage:'',
+            playerLife:3, dealerLife:3, stageCleared:false
+        });
+
+        // localStorage 操作
+        const loadUser = name => {
+            const data = localStorage.getItem('user_'+name);
+            return data ? JSON.parse(data) : null;
+        };
+        const saveUser = ()=>{
+            const data={username:state.username, stages:state.stages};
+            localStorage.setItem('user_'+state.username, JSON.stringify(data));
+        };
+
+        // ユーザー操作
+        const registerUser = ()=>{
+            if(!state.username) return;
+            const existing = loadUser(state.username);
+            if(existing){
+                state.stages = existing.stages;
+                state.message = "ユーザーは既に存在します";
+            } else {
+                const stages={}; for(let i=1;i<=9;i++) stages[i]=i===1;
+                state.stages=stages;
+                state.message = state.username+" が登録されました";
+                saveUser();
+            }
+            state.currentPage='stageSelect';
+        };
+        const deleteUser = ()=>{
+            if(!state.username) return;
+            localStorage.removeItem('user_'+state.username);
+            state.currentPage='register';
+            state.username='';
+            state.stages={};
+            state.message='';
+        };
+
+        // 結果出力
+        const exportUserData = ()=>{
+            if(!state.username) return;
+            const data = loadUser(state.username);
+            if(!data) return;
+            const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = state.username+".json";
+            a.click();
+            URL.revokeObjectURL(url);
+        };
+
+        // ゲーム
+        const selectStage = stage => { state.selectedStage=stage; state.currentPage='game'; startGame(); };
+        const startGame = ()=>{
+            state.deck=createDeck(); shuffleDeck(state.deck);
+            state.dealerCards=[drawCard(),drawCard()]; state.playerCards=[drawCard(),drawCard()];
+            state.dealerTotal=calculateTotal(state.dealerCards); state.playerTotal=calculateTotal(state.playerCards);
+            state.roundOver=false; state.resultMessage=''; state.stageCleared=false;
+        };
+        const hit = ()=>{
+            if(state.roundOver||state.gameOver||state.stageCleared) return;
+            state.playerCards.push(drawCard()); state.playerTotal=calculateTotal(state.playerCards);
+            if(state.playerTotal>21) endRound();
+        };
+        const stand = ()=>{
+            if(state.roundOver||state.gameOver||state.stageCleared) return;
+            while(state.dealerTotal<17){state.dealerCards.push(drawCard()); state.dealerTotal=calculateTotal(state.dealerCards);}
+            endRound();
+        };
+        const endRound = ()=>{
+            state.roundOver=true;
+            const player=state.playerTotal, dealer=state.dealerTotal;
+            if(player>21){state.resultMessage='バースト！あなたの負けです。'; state.playerLife--;}
+            else if(dealer>21||player>dealer){
+                state.resultMessage='あなたの勝ちです！'; state.dealerLife--;
+                if(state.dealerLife===0){
+                    state.stageCleared=true; state.resultMessage+=' Stage Cleared!';
+                    const nextStage = parseInt(state.selectedStage)+1;
+                    if(nextStage<=9) state.stages[nextStage]=true;
+                    saveUser();
+                }
+            } else if(player<dealer){state.resultMessage='あなたの負けです。'; state.playerLife--;}
+            else state.resultMessage='引き分けです。';
+            if(state.playerLife<=0) state.gameOver=true;
+        };
+        const nextRound=()=>{state.roundOver=false; startGame();};
+        const backToStageSelect=()=>{state.currentPage='stageSelect'; state.selectedStage=null; state.roundOver=false; state.gameOver=false; state.playerLife=3; state.dealerLife=3; state.resultMessage='';};
+
+        // ヘルパー
+        const createDeck=()=>{const suits=['♠','♥','♦','♣'],values=['2','3','4','5','6','7','8','9','10','J','Q','K','A'],d=[];for(const s of suits)for(const v of values)d.push(s+v); return d;};
+        const shuffleDeck=d=>{for(let i=d.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[d[i],d[j]]=[d[j],d[i]];}};
+        const drawCard=()=>state.deck.pop();
+        const calculateTotal=c=>{let t=0,a=0;for(let card of c){let v=card.slice(1); if(['J','Q','K'].includes(v)) t+=10; else if(v==='A'){t+=11;a++;} else t+=parseInt(v);} while(t>21&&a>0){t-=10;a--;} return t;};
+
+        return {...toRefs(state),registerUser,deleteUser,selectStage,hit,stand,nextRound,backToStageSelect, exportUserData};
+    }
+}).mount('#app');
+</script>
+</body>
+</html>

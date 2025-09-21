@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>My Works</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
 :root{
   --bg-top: #f5f5f7;
@@ -129,6 +130,19 @@ canvas#bgCanvas {
   background:#555;
 }
 
+/* GitHubアイコンリンク */
+#modalInner a.github-icon {
+  display:inline-block;
+  font-size:2.5rem;
+  color:#333;
+  margin-top:25px;
+  transition: transform 0.3s, color 0.3s;
+}
+#modalInner a.github-icon:hover{
+  transform: scale(1.1);
+  color:#555;
+}
+
 /* カード開閉アニメーション */
 .card.open{
   animation: cardOpen 0.6s forwards;
@@ -145,15 +159,13 @@ canvas#bgCanvas {
 <canvas id="bgCanvas"></canvas>
 
 <div class="container">
-  
   <div class="card" data-title="BlackJack" data-summary="シンプルなブラックジャックゲームです。" data-url="myworks/blackjack.html">
     <h2>BlackJack</h2>
   </div>
 
-  <div class="card" data-title="Links" data-summary="ここでは関連リンクをまとめています。" data-url="links.html">
+  <div class="card" data-title="Links" data-summary="ここでは関連リンクをまとめています。" data-url="https://github.com/sumire-tech">
     <h2>Links</h2>
   </div>
-  
 </div>
 
 <div id="modal">
@@ -162,7 +174,7 @@ canvas#bgCanvas {
     <div id="modalInner">
       <h2>サンプルタイトル</h2>
       <p>ここに概要が入ります。</p>
-      <a href="#" id="playButton" target="_blank">Play</a>
+      <a href="#" id="playButton">Play</a>
     </div>
   </div>
 </div>
@@ -184,7 +196,13 @@ document.querySelectorAll(".card").forEach(card=>{
     const summary = card.dataset.summary;
     const url = card.dataset.url;
 
-    modalInner.innerHTML = `<h2>${title}</h2><p>${summary}</p><a href="${url}" target="_blank" id="playButton">Play</a>`;
+    // Linksカードの場合はPlayボタンではなくGitHubアイコンを表示
+    if(title.toLowerCase() === "links"){
+      modalInner.innerHTML = `<h2>${title}</h2><p>${summary}</p>
+        <a href="${url}" target="_blank" class="github-icon"><i class="fab fa-github"></i></a>`;
+    } else {
+      modalInner.innerHTML = `<h2>${title}</h2><p>${summary}</p><a href="${url}" target="_blank" id="playButton">Play</a>`;
+    }
   });
 });
 

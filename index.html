@@ -75,20 +75,6 @@ canvas#bgCanvas {
 .card h2{ font-family:"Playfair Display", serif; font-size:2rem; margin:0 0 20px; color: #333; }
 .card p{ font-size:1.1rem; line-height:1.6; color: #444; margin:0 auto; max-width:60ch; }
 
-/* フルスクリーンボタン */
-.fullscreenBtn {
-  margin-top: 20px;
-  padding: 8px 16px;
-  font-size: 0.95rem;
-  border: none;
-  border-radius: 6px;
-  background-color: #444;
-  color: #fff;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-.fullscreenBtn:hover { background-color: #666; }
-
 /* モーダル */
 #modal {
   position:fixed;
@@ -115,16 +101,8 @@ canvas#bgCanvas {
   text-align:center;
   overflow-y:auto;
   box-shadow: var(--modal-shadow);
+  position:relative;
 }
-
-/* スクロールバー */
-#modalContent::-webkit-scrollbar { width:10px; }
-#modalContent::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius:5px; }
-#modalContent::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius:5px; }
-#modalContent::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.35); }
-
-#modalContent h2{ font-family:"Playfair Display", serif; font-size:2rem; margin-bottom:20px; }
-#modalContent p{ font-size:1.1rem; line-height:1.6; }
 
 #modalClose{
   position:absolute;
@@ -133,6 +111,22 @@ canvas#bgCanvas {
   font-size:1.5rem;
   cursor:pointer;
   color: #333;
+}
+
+#playButton {
+  display:inline-block;
+  margin-top:25px;
+  padding:12px 25px;
+  background:#333;
+  color:#fff;
+  border-radius:12px;
+  text-decoration:none;
+  font-weight:600;
+  transition: transform 0.3s, background 0.3s;
+}
+#playButton:hover{
+  transform: scale(1.05);
+  background:#555;
 }
 
 /* カード開閉アニメーション */
@@ -152,9 +146,12 @@ canvas#bgCanvas {
 
 <div class="container">
   
-  <div class="card" data-content="myworks/blackjack.html">
-    <h2>Black Jack</h2>
-    <button class="fullscreenBtn">フルスクリーンで表示</button>
+  <div class="card" data-title="BlackJack" data-summary="シンプルなブラックジャックゲームです。" data-url="myworks/blackjack.html">
+    <h2>BlackJack</h2>
+  </div>
+
+  <div class="card" data-title="Links" data-summary="ここでは関連リンクをまとめています。" data-url="links.html">
+    <h2>Links</h2>
   </div>
   
 </div>
@@ -163,16 +160,15 @@ canvas#bgCanvas {
   <div id="modalContent">
     <div id="modalClose">&times;</div>
     <div id="modalInner">
-      <h2>My Works</h2>
-      <p>sample contents</p>
+      <h2>サンプルタイトル</h2>
+      <p>ここに概要が入ります。</p>
+      <a href="#" id="playButton" target="_blank">Play</a>
     </div>
   </div>
 </div>
 
 <script>
-// ===== モーダルの既存機能 =====
 const modal = document.getElementById("modal");
-const modalContent = document.getElementById("modalContent");
 const modalClose = document.getElementById("modalClose");
 const modalInner = document.getElementById("modalInner");
 
@@ -180,14 +176,15 @@ document.querySelectorAll(".card").forEach(card=>{
   card.addEventListener("click", ()=>{
     card.classList.add("open");
     setTimeout(()=>{ card.classList.remove("open"); },600);
+
     modal.style.display="flex";
     setTimeout(()=>{ modal.classList.add("show"); },10);
 
-    const url = card.dataset.content;
-    fetch(url)
-      .then(r=>r.text())
-      .then(html=>{ modalInner.innerHTML = html; })
-      .catch(e=>{ modalInner.innerHTML = "<p>コンテンツを読み込めませんでした。</p>"; });
+    const title = card.dataset.title;
+    const summary = card.dataset.summary;
+    const url = card.dataset.url;
+
+    modalInner.innerHTML = `<h2>${title}</h2><p>${summary}</p><a href="${url}" target="_blank" id="playButton">Play</a>`;
   });
 });
 
@@ -195,46 +192,14 @@ function closeModal(){
   modal.classList.remove("show");
   setTimeout(()=>{ 
     modal.style.display="none"; 
-    modalInner.innerHTML="<h2>サンプルタイトル</h2><p>ここにサンプルコンテンツが入ります。長くなるとスクロール可能です。</p>"; 
+    modalInner.innerHTML="<h2>サンプルタイトル</h2><p>ここに概要が入ります。</p><a href='#' id='playButton'>Play</a>";
   },500);
 }
+
 modalClose.addEventListener("click", closeModal);
 modal.addEventListener("click",(e)=>{ if(e.target===modal) closeModal(); });
 
-// ===== フルスクリーン表示ボタン機能 =====
-document.querySelectorAll(".fullscreenBtn").forEach(btn=>{
-  btn.addEventListener("click", e=>{
-    e.stopPropagation(); // カードのclickを止める
-    const card = btn.closest(".card");
-    const url = card.dataset.content;
-
-    const fsContainer = document.createElement("div");
-    fsContainer.style.position="fixed";
-    fsContainer.style.top="0";
-    fsContainer.style.left="0";
-    fsContainer.style.width="100%";
-    fsContainer.style.height="100%";
-    fsContainer.style.background="#fff";
-    fsContainer.style.zIndex="9999";
-    fsContainer.style.overflow="auto";
-    fsContainer.style.padding="40px";
-    document.body.appendChild(fsContainer);
-
-    // 外部HTMLを読み込む
-    fetch(url).then(r=>r.text()).then(html=>{
-      fsContainer.innerHTML = html + `<button id="exitFS" style="position:fixed;top:20px;right:20px;padding:10px 16px;font-size:1rem;">閉じる</button>`;
-      document.getElementById("exitFS").addEventListener("click", ()=>{
-        document.body.removeChild(fsContainer);
-      });
-    }).catch(e=>{
-      fsContainer.innerHTML = "<p>コンテンツを読み込めませんでした。</p>";
-    });
-
-    if(fsContainer.requestFullscreen) fsContainer.requestFullscreen();
-  });
-});
-
-// ===== 背景幾何学アニメーション =====
+// 背景幾何学アニメーション
 const canvas = document.getElementById('bgCanvas');
 const ctx = canvas.getContext('2d');
 let width = canvas.width = window.innerWidth;
@@ -243,7 +208,7 @@ const layers = [];
 for(let l=0;l<3;l++){
   const points=[];
   for(let i=0;i<40;i++){
-    points.push({x:Math.random()*width, y:Math.random()*height, r:1.5+Math.random()*2, vx:(Math.random()-0.5)*(0.3-l*0.05), vy:(Math.random()-0.5)*(0.3-l*0.05)});
+    points.push({x:Math.random()*width, y:Math.random()*height, r:1.5+Math.random()*2, vx:(Math.random()-0.5)*(0.15-l*0.03), vy:(Math.random()-0.5)*(0.15-l*0.03)});
   }
   layers.push(points);
 }
@@ -275,9 +240,12 @@ function draw(){
   requestAnimationFrame(draw);
 }
 draw();
-window.addEventListener('resize',()=>{ width=canvas.width=window.innerWidth; height=canvas.height=window.innerHeight; });
+
+window.addEventListener('resize',()=>{
+  width=canvas.width=window.innerWidth;
+  height=canvas.height=window.innerHeight;
+});
 </script>
 
 </body>
 </html>
-

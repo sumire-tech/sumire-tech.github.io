@@ -41,11 +41,11 @@ canvas#bgCanvas {
   z-index:4;
 }
 
-/* カード（透けない白に変更） */
+/* カード */
 .card {
   margin:60px 0;
   padding: 40px;
-  background: #fff;           /* 完全白に変更 */
+  background: #fff;
   border-radius:20px;
   box-shadow: 0 15px 50px rgba(0,0,0,0.12), 0 0 40px rgba(255,255,255,0.08);
   text-align:center;
@@ -213,43 +213,47 @@ function closeModal(){
 modalClose.addEventListener("click", closeModal);
 modal.addEventListener("click",(e)=>{ if(e.target===modal) closeModal(); });
 
-/* 背景幾何学アニメーション */
+/* 背景幾何学アニメーション（レイヤー1枚だけ） */
 const canvas = document.getElementById('bgCanvas');
 const ctx = canvas.getContext('2d');
 let width = canvas.width = window.innerWidth;
 let height = canvas.height = window.innerHeight;
-const layers = [];
-for(let l=0;l<3;l++){
-  const points=[];
-  for(let i=0;i<40;i++){
-    points.push({x:Math.random()*width, y:Math.random()*height, r:1.5+Math.random()*2, vx:(Math.random()-0.5)*(0.15-l*0.03), vy:(Math.random()-0.5)*(0.15-l*0.03)});
-  }
-  layers.push(points);
+
+// ★ここを1層だけにする
+const points = [];
+for(let i=0;i<40;i++){
+  points.push({
+    x: Math.random()*width,
+    y: Math.random()*height,
+    r: 2 + Math.random()*2,
+    vx: (Math.random()-0.5)*0.12,
+    vy: (Math.random()-0.5)*0.12
+  });
 }
+
 function draw(){
   ctx.clearRect(0,0,width,height);
-  layers.forEach((points,li)=>{
-    points.forEach((p,i)=>{
-      ctx.beginPath();
-      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-      ctx.fillStyle = `rgba(0,0,0,${0.02 + li*0.02})`;
-      ctx.fill();
-      p.x += p.vx; p.y += p.vy;
-      if(p.x<0||p.x>width)p.vx*=-1;
-      if(p.y<0||p.y>height)p.vy*=-1;
-      for(let j=i+1;j<points.length;j++){
-        const p2=points[j];
-        const d=Math.hypot(p.x-p2.x,p.y-p2.y);
-        if(d<180){
-          ctx.beginPath();
-          ctx.moveTo(p.x,p.y);
-          ctx.lineTo(p2.x,p2.y);
-          ctx.strokeStyle=`rgba(0,0,0,${0.01*(1-d/180)+li*0.02})`;
-          ctx.lineWidth=1;
-          ctx.stroke();
-        }
+  points.forEach((p,i)=>{
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle = "rgba(0,0,0,0.02)"; // 薄い点だけ
+    ctx.fill();
+    p.x += p.vx; p.y += p.vy;
+    if(p.x<0||p.x>width)p.vx*=-1;
+    if(p.y<0||p.y>height)p.vy*=-1;
+
+    for(let j=i+1;j<points.length;j++){
+      const p2 = points[j];
+      const d = Math.hypot(p.x-p2.x, p.y-p2.y);
+      if(d<180){
+        ctx.beginPath();
+        ctx.moveTo(p.x,p.y);
+        ctx.lineTo(p2.x,p2.y);
+        ctx.strokeStyle = `rgba(0,0,0,${0.01*(1-d/180)})`;
+        ctx.lineWidth=1;
+        ctx.stroke();
       }
-    });
+    }
   });
   requestAnimationFrame(draw);
 }

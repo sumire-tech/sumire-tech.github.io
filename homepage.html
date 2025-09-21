@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HomePage</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-top: #f5f5f7;
+  --bg-bottom: #dcdde1;
+  --card-bg: rgba(220,220,220,0.25);
+  --modal-bg: rgba(255,255,255,0.95);
+  --modal-shadow: 0 15px 50px rgba(0,0,0,0.2), 0 0 40px rgba(0,0,0,0.1);
+}
+
+*{box-sizing:border-box;}
+html,body{
+  margin:0;
+  font-family:"Inter",sans-serif;
+  background: linear-gradient(to bottom, var(--bg-top), var(--bg-bottom));
+  color: #333;
+  overflow-x:hidden;
+  position:relative;
+}
+
+/* 背景キャンバス */
+canvas#bgCanvas {
+  position:fixed;
+  inset:0;
+  z-index:1;
+}
+
+/* コンテナ */
+.container {
+  width:100%;
+  max-width:900px;
+  margin:0 auto;
+  padding:60px 20px;
+  position:relative;
+  z-index:4;
+}
+
+/* カード */
+.card {
+  margin:60px 0;
+  padding: 40px;
+  background: var(--card-bg);
+  border-radius:20px;
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  box-shadow: 0 15px 50px rgba(0,0,0,0.12), 0 0 40px rgba(255,255,255,0.08);
+  text-align:center;
+  cursor:pointer;
+  position:relative;
+  z-index:5;
+  transition: transform 0.5s ease, box-shadow 0.5s ease;
+  background-image: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.05) 0%, transparent 50%),
+                    radial-gradient(circle at 70% 70%, rgba(255,255,255,0.05) 0%, transparent 50%);
+}
+.card::after {
+  content:"";
+  position:absolute;
+  top:0; left:0; right:0; bottom:0;
+  border-radius:20px;
+  pointer-events:none;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
+  opacity:0.6;
+  mix-blend-mode: overlay;
+}
+.card:hover{
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 25px 80px rgba(0,0,0,0.15), 0 0 60px rgba(255,255,255,0.12);
+}
+.card h2{ font-family:"Playfair Display", serif; font-size:2rem; margin:0 0 20px; color: #333; }
+.card p{ font-size:1.1rem; line-height:1.6; color: #444; margin:0 auto; max-width:60ch; }
+
+/* モーダル */
+#modal {
+  position:fixed;
+  inset:0;
+  background: var(--modal-bg);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:6;
+  opacity:0;
+  transition: opacity 0.5s ease;
+}
+#modal.show{ opacity:1; display:flex; }
+
+#modalContent {
+  background: var(--modal-bg);
+  border-radius:20px;
+  padding:50px 40px;
+  max-width:700px;
+  max-height:80vh;
+  color: #333;
+  backdrop-filter: blur(25px) saturate(180%);
+  -webkit-backdrop-filter: blur(25px) saturate(180%);
+  text-align:center;
+  overflow-y:auto;
+  box-shadow: var(--modal-shadow);
+}
+
+/* スクロールバー */
+#modalContent::-webkit-scrollbar { width:10px; }
+#modalContent::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius:5px; }
+#modalContent::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius:5px; }
+#modalContent::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.35); }
+
+#modalContent h2{ font-family:"Playfair Display", serif; font-size:2rem; margin-bottom:20px; }
+#modalContent p{ font-size:1.1rem; line-height:1.6; }
+
+#modalClose{
+  position:absolute;
+  top:15px;
+  right:20px;
+  font-size:1.5rem;
+  cursor:pointer;
+  color: #333;
+}
+
+/* カード開閉アニメーション */
+.card.open{
+  animation: cardOpen 0.6s forwards;
+}
+@keyframes cardOpen{
+  0% { transform: scale(1) rotateX(0deg) rotateY(0deg); }
+  50% { transform: scale(1.05) rotateX(4deg) rotateY(2deg); }
+  100% { transform: scale(1) rotateX(0deg) rotateY(0deg); }
+}
+</style>
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+
+<div class="container">
+  <div class="card" data-content="profile.html">
+    <h2>Profile</h2>
+  </div>
+
+  <div class="card" data-content="works.html">
+    <h2>My Works</h2>
+  </div>
+
+  <div class="card" data-content="links.html">
+    <h2>Links</h2>
+  </div>
+</div>
+
+<div id="modal">
+  <div id="modalContent">
+    <div id="modalClose">&times;</div>
+    <div id="modalInner">
+      <h2>サンプルタイトル</h2>
+      <p>ここにサンプルコンテンツが入ります。長くなるとスクロール可能です。Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin nec ligula at urna pretium dictum. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const modal = document.getElementById("modal");
+const modalContent = document.getElementById("modalContent");
+const modalClose = document.getElementById("modalClose");
+const modalInner = document.getElementById("modalInner");
+
+document.querySelectorAll(".card").forEach(card=>{
+  card.addEventListener("click", ()=>{
+    card.classList.add("open");
+    setTimeout(()=>{ card.classList.remove("open"); },600);
+    modal.style.display="flex";
+    setTimeout(()=>{ modal.classList.add("show"); },10);
+
+    // 外部HTMLを読み込む
+    const url = card.dataset.content;
+    fetch(url)
+      .then(r=>r.text())
+      .then(html=>{
+        modalInner.innerHTML = html;
+      })
+      .catch(e=>{
+        modalInner.innerHTML = "<p>コンテンツを読み込めませんでした。</p>";
+      });
+  });
+});
+
+function closeModal(){
+  modal.classList.remove("show");
+  setTimeout(()=>{ modal.style.display="none"; modalInner.innerHTML="<h2>サンプルタイトル</h2><p>ここにサンプルコンテンツが入ります。長くなるとスクロール可能です。</p>"; },500);
+}
+
+modalClose.addEventListener("click", closeModal);
+modal.addEventListener("click",(e)=>{ if(e.target===modal) closeModal(); });
+
+// 背景幾何学アニメーション
+const canvas = document.getElementById('bgCanvas');
+const ctx = canvas.getContext('2d');
+let width = canvas.width = window.innerWidth;
+let height = canvas.height = window.innerHeight;
+const layers = [];
+for(let l=0;l<3;l++){
+  const points=[];
+  for(let i=0;i<40;i++){
+    points.push({x:Math.random()*width, y:Math.random()*height, r:1.5+Math.random()*2, vx:(Math.random()-0.5)*(0.3-l*0.05), vy:(Math.random()-0.5)*(0.3-l*0.05)});
+  }
+  layers.push(points);
+}
+function draw(){
+  ctx.clearRect(0,0,width,height);
+  layers.forEach((points,li)=>{
+    points.forEach((p,i)=>{
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle = `rgba(0,0,0,${0.02 + li*0.02})`;
+      ctx.fill();
+      p.x += p.vx; p.y += p.vy;
+      if(p.x<0||p.x>width)p.vx*=-1;
+      if(p.y<0||p.y>height)p.vy*=-1;
+      for(let j=i+1;j<points.length;j++){
+        const p2=points[j];
+        const d=Math.hypot(p.x-p2.x,p.y-p2.y);
+        if(d<180){
+          ctx.beginPath();
+          ctx.moveTo(p.x,p.y);
+          ctx.lineTo(p2.x,p2.y);
+          ctx.strokeStyle=`rgba(0,0,0,${0.01*(1-d/180)+li*0.02})`;
+          ctx.lineWidth=1;
+          ctx.stroke();
+        }
+      }
+    });
+  });
+  requestAnimationFrame(draw);
+}
+draw();
+window.addEventListener('resize',()=>{ width=canvas.width=window.innerWidth; height=canvas.height=window.innerHeight; });
+</script>
+
+</body>
+</html>

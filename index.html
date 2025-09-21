@@ -10,7 +10,6 @@
 :root{
   --bg-top: #f5f5f7;
   --bg-bottom: #dcdde1;
-  --card-bg: rgba(220,220,220,0.25);
   --modal-bg: rgba(255,255,255,0.95);
   --modal-shadow: 0 15px 50px rgba(0,0,0,0.2), 0 0 40px rgba(0,0,0,0.1);
 }
@@ -42,40 +41,39 @@ canvas#bgCanvas {
   z-index:4;
 }
 
-/* カード */
+/* カード（透けない白に変更） */
 .card {
   margin:60px 0;
   padding: 40px;
+  background: #fff;           /* 完全白に変更 */
   border-radius:20px;
-  backdrop-filter: blur(30px) saturate(180%);
-  -webkit-backdrop-filter: blur(30px) saturate(180%);
   box-shadow: 0 15px 50px rgba(0,0,0,0.12), 0 0 40px rgba(255,255,255,0.08);
   text-align:center;
   cursor:pointer;
   position:relative;
   z-index:5;
   transition: transform 0.5s ease, box-shadow 0.5s ease;
-  background-image: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.05) 0%, transparent 50%),
-                    radial-gradient(circle at 70% 70%, rgba(255,255,255,0.05) 0%, transparent 50%);
-}
-
-.card::after {
-  content:"";
-  position:absolute;
-  top:0; left:0; right:0; bottom:0;
-  border-radius:20px;
-  pointer-events:none;
-  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
-  opacity:0.6;
-  mix-blend-mode: overlay;
 }
 
 .card:hover{
   transform: translateY(-5px) scale(1.02);
   box-shadow: 0 25px 80px rgba(0,0,0,0.15), 0 0 60px rgba(255,255,255,0.12);
 }
-.card h2{ font-family:"Playfair Display", serif; font-size:2rem; margin:0 0 20px; color: #333; }
-.card p{ font-size:1.1rem; line-height:1.6; color: #444; margin:0 auto; max-width:60ch; }
+
+.card h2{ 
+  font-family:"Playfair Display", serif; 
+  font-size:2rem; 
+  margin:0 0 20px; 
+  color: #333; 
+}
+
+.card p{ 
+  font-size:1.1rem; 
+  line-height:1.6; 
+  color: #444; 
+  margin:0 auto; 
+  max-width:60ch; 
+}
 
 /* モーダル */
 #modal {
@@ -98,8 +96,6 @@ canvas#bgCanvas {
   max-width:700px;
   max-height:80vh;
   color: #333;
-  backdrop-filter: blur(25px) saturate(180%);
-  -webkit-backdrop-filter: blur(25px) saturate(180%);
   text-align:center;
   overflow-y:auto;
   box-shadow: var(--modal-shadow);
@@ -197,7 +193,6 @@ document.querySelectorAll(".card").forEach(card=>{
     const summary = card.dataset.summary;
     const url = card.dataset.url;
 
-    // Linksカードの場合はPlayボタンではなくGitHubアイコンを表示
     if(title.toLowerCase() === "links"){
       modalInner.innerHTML = `<h2>${title}</h2><p>${summary}</p>
         <a href="${url}" target="_blank" class="github-icon"><i class="fab fa-github"></i></a>`;
@@ -218,7 +213,7 @@ function closeModal(){
 modalClose.addEventListener("click", closeModal);
 modal.addEventListener("click",(e)=>{ if(e.target===modal) closeModal(); });
 
-// 背景幾何学アニメーション
+/* 背景幾何学アニメーション */
 const canvas = document.getElementById('bgCanvas');
 const ctx = canvas.getContext('2d');
 let width = canvas.width = window.innerWidth;
@@ -268,6 +263,3 @@ window.addEventListener('resize',()=>{
 
 </body>
 </html>
-
-
-

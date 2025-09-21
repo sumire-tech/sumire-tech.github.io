@@ -198,7 +198,6 @@ document.querySelectorAll(".card").forEach(card=>{
     const summary = card.dataset.summary;
     const url = card.dataset.url;
 
-    // Linksカードの場合はPlayボタンではなくGitHubアイコンを表示
     if(title.toLowerCase() === "links"){
       modalInner.innerHTML = `<h2>${title}</h2><p>${summary}</p>
         <a href="${url}" target="_blank" class="github-icon"><i class="fab fa-github"></i></a>`;
@@ -219,54 +218,76 @@ function closeModal(){
 modalClose.addEventListener("click", closeModal);
 modal.addEventListener("click",(e)=>{ if(e.target===modal) closeModal(); });
 
-// 背景幾何学アニメーション
+// ===== 背景幾何学アニメーション =====
 const canvas = document.getElementById('bgCanvas');
 const ctx = canvas.getContext('2d');
 let width = canvas.width = window.innerWidth;
 let height = canvas.height = window.innerHeight;
-const layers = [];
-for(let l=0;l<3;l++){
-  const points=[];
-  for(let i=0;i<40;i++){
-    points.push({x:Math.random()*width, y:Math.random()*height, r:1.5+Math.random()*2, vx:(Math.random()-0.5)*(0.15-l*0.03), vy:(Math.random()-0.5)*(0.15-l*0.03)});
-  }
-  layers.push(points);
+
+function resizeCanvas() {
+  width = canvas.width = window.innerWidth;
+  height = canvas.height = window.innerHeight;
 }
-function draw(){
-  ctx.clearRect(0,0,width,height);
-  layers.forEach((points,li)=>{
-    points.forEach((p,i)=>{
-      ctx.beginPath();
-      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-      ctx.fillStyle = `rgba(0,0,0,${0.02 + li*0.02})`;
-      ctx.fill();
-      p.x += p.vx; p.y += p.vy;
-      if(p.x<0||p.x>width)p.vx*=-1;
-      if(p.y<0||p.y>height)p.vy*=-1;
-      for(let j=i+1;j<points.length;j++){
-        const p2=points[j];
-        const d=Math.hypot(p.x-p2.x,p.y-p2.y);
-        if(d<180){
-          ctx.beginPath();
-          ctx.moveTo(p.x,p.y);
-          ctx.lineTo(p2.x,p2.y);
-          ctx.strokeStyle=`rgba(0,0,0,${0.01*(1-d/180)+li*0.02})`;
-          ctx.lineWidth=1;
-          ctx.stroke();
-        }
-      }
-    });
+window.addEventListener('resize', resizeCanvas);
+
+// シェイプ定義（前の幾何学模様）
+const shapes = [];
+for(let i=0;i<50;i++){
+  shapes.push({
+    x: Math.random()*width,
+    y: Math.random()*height,
+    size: 10 + Math.random()*25,
+    dx: (Math.random()-0.5)*0.6,
+    dy: (Math.random()-0.5)*0.6,
+    angle: Math.random()*Math.PI*2,
+    type: Math.random()>0.5 ? "circle" : "triangle"
   });
-  requestAnimationFrame(draw);
 }
-draw();
 
-window.addEventListener('resize',()=>{
-  width=canvas.width=window.innerWidth;
-  height=canvas.height=window.innerHeight;
-});
+function drawShape(s){
+  ctx.save();
+  ctx.translate(s.x, s.y);
+  ctx.rotate(s.angle);
+  ctx.strokeStyle = "rgba(0,0,0,0.08)"; // 透明度軽めで暗くならない
+  ctx.lineWidth = 1;
+
+  if(s.type==="circle"){
+    ctx.beginPath();
+    ctx.arc(0,0,s.size,0,Math.PI*2);
+    ctx.stroke();
+  } else {
+    ctx.beginPath();
+    ctx.moveTo(-s.size,s.size);
+    ctx.lineTo(0,-s.size);
+    ctx.lineTo(s.size,s.size);
+    ctx.closePath();
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function animate(){
+  ctx.clearRect(0,0,width,height);
+  shapes.forEach(s=>{
+    s.x += s.dx;
+    s.y += s.dy;
+    s.angle += 0.001;
+    if(s.x<-s.size||s.x>width+s.size||s.y<-s.size||s.y>height+s.size){
+      Object.assign(s,{
+        x: Math.random()*width,
+        y: Math.random()*height,
+        size: 10 + Math.random()*25,
+        dx: (Math.random()-0.5)*0.6,
+        dy: (Math.random()-0.5)*0.6,
+        angle: Math.random()*Math.PI*2,
+        type: Math.random()>0.5 ? "circle" : "triangle"
+      });
+    }
+    drawShape(s);
+  });
+  requestAnimationFrame(animate);
+}
+animate();
 </script>
-
 </body>
 </html>
-

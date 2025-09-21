@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>HomePage</title>
+<title>My Works</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -75,6 +75,20 @@ canvas#bgCanvas {
 .card h2{ font-family:"Playfair Display", serif; font-size:2rem; margin:0 0 20px; color: #333; }
 .card p{ font-size:1.1rem; line-height:1.6; color: #444; margin:0 auto; max-width:60ch; }
 
+/* フルスクリーンボタン */
+.fullscreenBtn {
+  margin-top: 20px;
+  padding: 8px 16px;
+  font-size: 0.95rem;
+  border: none;
+  border-radius: 6px;
+  background-color: #444;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+.fullscreenBtn:hover { background-color: #666; }
+
 /* モーダル */
 #modal {
   position:fixed;
@@ -137,16 +151,19 @@ canvas#bgCanvas {
 <canvas id="bgCanvas"></canvas>
 
 <div class="container">
-  <div class="card" data-content="profile.html">
-    <h2>Profile</h2>
+  <div class="card" data-content="about.html">
+    <h2>About Me</h2>
+    <button class="fullscreenBtn">フルスクリーンで表示</button>
   </div>
 
   <div class="card" data-content="works.html">
     <h2>My Works</h2>
+    <button class="fullscreenBtn">フルスクリーンで表示</button>
   </div>
 
   <div class="card" data-content="links.html">
     <h2>Links</h2>
+    <button class="fullscreenBtn">フルスクリーンで表示</button>
   </div>
 </div>
 
@@ -154,13 +171,14 @@ canvas#bgCanvas {
   <div id="modalContent">
     <div id="modalClose">&times;</div>
     <div id="modalInner">
-      <h2>サンプルタイトル</h2>
-      <p>ここにサンプルコンテンツが入ります。長くなるとスクロール可能です。Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin nec ligula at urna pretium dictum. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.</p>
+      <h2>My Works</h2>
+      <p>sample contents</p>
     </div>
   </div>
 </div>
 
 <script>
+// ===== モーダルの既存機能 =====
 const modal = document.getElementById("modal");
 const modalContent = document.getElementById("modalContent");
 const modalClose = document.getElementById("modalClose");
@@ -173,28 +191,58 @@ document.querySelectorAll(".card").forEach(card=>{
     modal.style.display="flex";
     setTimeout(()=>{ modal.classList.add("show"); },10);
 
-    // 外部HTMLを読み込む
     const url = card.dataset.content;
     fetch(url)
       .then(r=>r.text())
-      .then(html=>{
-        modalInner.innerHTML = html;
-      })
-      .catch(e=>{
-        modalInner.innerHTML = "<p>コンテンツを読み込めませんでした。</p>";
-      });
+      .then(html=>{ modalInner.innerHTML = html; })
+      .catch(e=>{ modalInner.innerHTML = "<p>コンテンツを読み込めませんでした。</p>"; });
   });
 });
 
 function closeModal(){
   modal.classList.remove("show");
-  setTimeout(()=>{ modal.style.display="none"; modalInner.innerHTML="<h2>サンプルタイトル</h2><p>ここにサンプルコンテンツが入ります。長くなるとスクロール可能です。</p>"; },500);
+  setTimeout(()=>{ 
+    modal.style.display="none"; 
+    modalInner.innerHTML="<h2>サンプルタイトル</h2><p>ここにサンプルコンテンツが入ります。長くなるとスクロール可能です。</p>"; 
+  },500);
 }
-
 modalClose.addEventListener("click", closeModal);
 modal.addEventListener("click",(e)=>{ if(e.target===modal) closeModal(); });
 
-// 背景幾何学アニメーション
+// ===== フルスクリーン表示ボタン機能 =====
+document.querySelectorAll(".fullscreenBtn").forEach(btn=>{
+  btn.addEventListener("click", e=>{
+    e.stopPropagation(); // カードのclickを止める
+    const card = btn.closest(".card");
+    const url = card.dataset.content;
+
+    const fsContainer = document.createElement("div");
+    fsContainer.style.position="fixed";
+    fsContainer.style.top="0";
+    fsContainer.style.left="0";
+    fsContainer.style.width="100%";
+    fsContainer.style.height="100%";
+    fsContainer.style.background="#fff";
+    fsContainer.style.zIndex="9999";
+    fsContainer.style.overflow="auto";
+    fsContainer.style.padding="40px";
+    document.body.appendChild(fsContainer);
+
+    // 外部HTMLを読み込む
+    fetch(url).then(r=>r.text()).then(html=>{
+      fsContainer.innerHTML = html + `<button id="exitFS" style="position:fixed;top:20px;right:20px;padding:10px 16px;font-size:1rem;">閉じる</button>`;
+      document.getElementById("exitFS").addEventListener("click", ()=>{
+        document.body.removeChild(fsContainer);
+      });
+    }).catch(e=>{
+      fsContainer.innerHTML = "<p>コンテンツを読み込めませんでした。</p>";
+    });
+
+    if(fsContainer.requestFullscreen) fsContainer.requestFullscreen();
+  });
+});
+
+// ===== 背景幾何学アニメーション =====
 const canvas = document.getElementById('bgCanvas');
 const ctx = canvas.getContext('2d');
 let width = canvas.width = window.innerWidth;

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>言語処理100本ノック #Frontend</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- トップページ -->
+        <div v-if="currentPage === 'home'">
+            <h1 class="heading">言語処理100本ノック2025 #Frontend</h1>
+            <p>言語処理100本ノックの第1章から第4章までを可能な限りフロントエンドで実装する試みです。</p>
+
+            <div class="slider">
+                <div 
+                class="slides"
+                :style="{ transform: `translateX(-${currentChapter * 100}%)` }"
+                >
+                    <div class="slide" v-for="(chapter, cIndex) in chapters" :key="cIndex">
+                        <h2>{{ chapter.title }}</h2>
+                        <div class="chapter-desc" v-html="chapter.description"></div>
+                        <div class="questions">
+                            <button 
+                            v-for="q in chapter.questions" 
+                            :key="q"
+                            @click="setPage('q' + String(q).padStart(2,'0'))"
+                            >
+                                Q{{ String(q).padStart(2,'0') }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <button @click="prevChapter" :disabled="currentChapter === 0">◀</button>
+                <button @click="nextChapter" :disabled="currentChapter === chapters.length - 1">▶</button>
+            </div>
+
+            <h2 class="heading">実装目的・公式問題からの変更点</h2>
+            <div class="center">
+                <p>
+                    本実装では、処理やアルゴリズムの挙動を理解することに重点を置いています。<br>
+                    また、1つの具体例だけでなく、様々な入力や変数を試せるようにすることと、入出力が即時反映されることを意識しました。<br>
+                </p>
+                <p>
+                    以上の目的に合わせて、特定の技術を要求する処理は全てUI操作で実現可能となるようにしています。<br>
+                    例えば、第2章のUNIXコマンドに関する問題は、コマンド入力を要求せず、代わりにボタン操作による実行としています。<br>
+                    また、第4章の一部の問題は、サーバーレス環境の制約により、あらかじめ複数の回答を用意し、その範囲内で結果を確認できるようにしています。<br>
+                </p>
+
+            </div>
+
+            <h2 class="heading">使用データ/参考資料</h3><br>
+                <a href ="https://nlp100.github.io/2025/ja/index.html">言語処理100本ノック</a>
+                <p>リンク先のそれぞれ対応する章のページで配布されているファイルを入力として使用することを想定しています。</p>
+
+            <section id="update-log">
+                <h4 class="heading">更新履歴</h4><br>
+                <p>2025/10/01 - 制作開始</p>
+
+            </section>
+
+        </div>
+
+
+        <!-- 問題ごとのページ -->
+
+        <!-- 第一章 -->
+        <div v-if="currentPage === 'q00'">
+            <h1>Q.00 パタトクカシーー</h1>
+            <p>2つの文字列を交互に連結する。</p>
+            <div>
+                <label>input1: <input v-model="q00_str1" /></label>
+            </div>
+            <div>
+                <label>input2: <input v-model="q00_str2" /></label>
+            </div>
+            <p>output: {{ q00_answer }}</p>
+            <button @click="backHome">トップページに戻る</button>
+        </div>
+
+        <div v-if="currentPage === 'q01'">
+            <h1>Q.01 タクシー</h1>
+            <p>偶数番目の文字を取り出す。</p>
+            <div>
+                <label>input: <input v-model="q01_str"></label>
+            </div>
+            <p>output: {{ q01_answer }}</p>
+            <button @click="backHome">トップページに戻る</button>
+        </div>
+
+        <div v-if="currentPage === 'q02'">
+            <h1>Q.02 文字列の逆順</h1>
+            <p>文字列を逆に並べ替える。</p>
+            <div>
+                <label>input: <input v-model="q02_str"></label>
+            </div>
+            <p>output: {{ q02_answer }}</p>
+            <button @click="backHome">トップページに戻る</button>
+        </div>
+
+        <div v-if="currentPage === 'q03'">
+            <h1>Q03. 円周率</h1>
+            <p>文章を単語に分解し、各単語の(アルファベットの)文字数を先頭から出現順に並べたリストを作成する。</p>
+            <div>
+                <label>input: <input v-model="q03_str"></label>
+            </div>
+            <p>output: {{ q03_answer }}</p>
+            <button @click="backHome">トップページに戻る</button>
+        </div>
+
+        <div v-if="currentPage === 'q04'">
+            <h1>Q04. 元素記号</h1>
+            <p>英文を単語に分解し、1, 5, 6, 7, 8, 9, 15, 16, 19番目の単語は先頭の1文字、それ以外の単語は先頭の2文字を取り出し、取り出した文字列から単語の位置（先頭から何番目の単語か）への連想配列（辞書型もしくはマップ型）を作成する。</p>
+            <div>
+                <label>input: <input v-model="q04_str"></label>
+            </div>
+            <p>output: {{ q04_answer }}</p>
+            <button @click="backHome">トップページに戻る</button>
+        </div>
+
+        <div v-if="currentPage === 'q05'">
+            <h1>Q05. n-gram</h1>
+            <p>文から文字n-gram、単語n-gramを得る。</p>
+            <div>
+                <label>n = <input type="number" v-model.number="q05_n"></label><br>
+                <label>input: <input v-model="q05_str"></label>
+            </div>
+            <p>文字n-gram: {{ q05_charNgram }}</p>
+            <p>単語n-gram: {{ q05_wordNgram }}</p>
+            <button @click="backHome">トップページに戻る</button>
+        </div>
+
+        <div v-if="currentPage === 'q06'">
+            <h1>Q06. 集合</h1>
+            <p>2種類の文字n-gramの集合をそれぞれX、Yとして、XとYの和集合(X∪Y)、積集合(X∩Y)、差集合(X\Y)を求める。<br>また、特定のn-gramがXおよびYに含まれるか判定する。</p>
+            <div>
+                <label>n = <input type="number" v-model.number="q06_n"></label><br>
+                <label>X: <input v-model="q06_x"></label>
+                <label>Y: <input v-model="q06_y"></label><br>
+                <label>判定する文字: <input v-model="q06_judge"></label>
+            </div>
+            <p>X∪Y: [ {{ q06_xory }} ]</p>
+            <p>X∩Y: [ {{ q06_xandy }} ]</p>
+            <p>X\Y: [ {{ q06_xminusy }} ]</p>
+            <br>
+            <p> {{ q06_judge }} はXに {{ q06_judge_x }}</p>
+            <p> {{ q06_judge }} はYに {{ q06_judge_y }}</p>
+            <button @click="backHome">トップページに戻る</button>
+        </div>
+
+        <div v-if="currentPage ==='q07'">
+            <h1>Q07.テンプレートによる文生成</h1>
+            <p>変数を埋め込み、テンプレート文を完成させる。</p>
+            <p>変数には、最大でx、y、zの3つを使用できます。テンプレート文の入力では {x} のように使用してください。</p>
+            <div>
+                <label>template: <textarea v-model="q07_template"></textarea></label><br>
+                <label>x: <input v-model="q07_x"></label>
+                <label>y: <input v-model="q07_y"></label>
+                <label>z: <input v-model="q07_z"></label>
+            </div>
+            <p>output: {{ q07_answer }}</p>
+            <button @click="backHome">トップページに戻る</button>
+        </div>
+
+        <div v-if="currentPage === 'q08'">
+            <h1>Q08. 暗号文</h1>
+            <p>以下のルールに従って、英文を暗号化・復号化する。</p>
+            <p> ・英小文字ならば (219 - 文字コード) のASCIIコードに対応する文字に置換<br>
+                ・その他の文字はそのまま出力
+            </p>
+            <div>
+                <label>plain text<br> <textarea v-model="q08_plain"></textarea></label>
+                <p>暗号化↓　↑復号化</p>
+                <label>cipher text<br> <textarea v-model="q08_cipher"></textarea></label>
+            </div>
+            <button @click="backHome">トップページに戻る</button>
+        </div>
+
+        <div v-if="currentPage === 'q09'">
+            <h1>Q09. Typoglycemia</h1>
+            <p>スペースで区切られた単語列に対して、各単語の先頭と末尾の文字は残し、それ以外の文字の順序をランダムに並び替える。ただし、長さが４以下の単語は並び替えない。</p>
+            <div>
+                <label>input: <textarea v-model="q09_str"></textarea></label>
+            </div>
+            <button @click="q09_shuffle">実行</button>
+            <p>output: {{ q09_answer }}</p>
+            <button @click="backHome">トップページに戻る</button>
+        </div>
+
+        <!-- 第二章 -->
+        <div v-if="currentPage === 'q10'">
+            <h1>Q10. 行数のカウント</h1>
+        </div>
+
+    </div>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

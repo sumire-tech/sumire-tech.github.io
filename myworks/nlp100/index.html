@@ -2,15 +2,15 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>言語処理100本ノック #Frontend</title>
+    <title>言語処理100本ノック_Frontend30</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div id="app">
         <!-- トップページ -->
         <div v-if="currentPage === 'home'">
-            <h1 class="heading">言語処理100本ノック2025 #Frontend</h1>
-            <p>言語処理100本ノックの第1章から第4章までを可能な限りフロントエンドで実装する試みです。</p>
+            <h1 class="heading">言語処理100本ノック2025_Frontend30</h1>
+            <p>言語処理100本ノックの第1章から第3章までの処理をフロントエンドで実装する試みです。</p>
 
             <div class="slider">
                 <div 
@@ -38,13 +38,12 @@
             <h2 class="heading">実装目的・公式問題からの変更点</h2>
             <div class="center">
                 <p>
-                    本実装では、処理やアルゴリズムの挙動を理解することに重点を置いています。<br>
-                    また、1つの具体例だけでなく、様々な入力や変数を試せるようにすることと、入出力が即時反映されることを意識しました。<br>
+                    本実装では、文字列/データをフロントエンドで簡単にかつ汎用的に処理できる技術を身に着けることを目的としています。<br>
+                    1つの具体例だけでなく、様々な入力や変数を試せるようにすることと、わかりやすいUIを意識しました。<br>
                 </p>
                 <p>
-                    以上の目的に合わせて、特定の技術を要求する処理は全てUI操作で実現可能となるようにしています。<br>
-                    例えば、第2章のUNIXコマンドに関する問題は、コマンド入力を要求せず、代わりにボタン操作による実行としています。<br>
-                    また、第4章の一部の問題は、サーバーレス環境の制約により、あらかじめ複数の回答を用意し、その範囲内で結果を確認できるようにしています。<br>
+                    以上の目的に合わせて、ボタン操作やリアルタイムで出力が確認できる仕様、データ出力機能などを追加しており、公式の問題とは異なる箇所が存在します。<br>
+                    なお、公式の問題タイトルはそのまま使用しています。
                 </p>
 
             </div>
@@ -55,6 +54,7 @@
 
             <section id="update-log">
                 <h4 class="heading">更新履歴</h4><br>
+                <p>2025/10/05 - 第2章Q10～Q14を公開</p>
                 <p>2025/10/02 - 第1章を公開</p>
                 <p>2025/10/01 - 制作開始</p>
 
@@ -191,11 +191,151 @@
         <!-- 第二章 -->
         <div v-if="currentPage === 'q10'">
             <h1>Q10. 行数のカウント</h1>
+            <p>ファイルの行数を確認する。</p>
+            <p>テキストファイル全般を入力として使用できます。(複数ファイルの入力も可能)<br>
+                Q11以降では<a href="https://nlp100.github.io/2025/ja/ch02.html#">言語処理100本ノック第2章</a>
+            で提供されているpopular-names.txtのようなデータを想定しているので、<br>特にこだわりがなければ、ダウンロードし、これを使用することを推奨します。</p>
+            <div>
+                <label><input type="file" multiple @change="onQ10FileUpload" /></label>
+            </div>
+            <div v-if="q10Files.length > 0">
+                <h3>行数を確認するファイルを選択</h3>
+                <div v-for="file in q10Files" :key="file.name">
+                    <input type="checkbox" :id="file.name" v-model="q10Selected[file.name]" />
+                    <label :for="file.name">{{ file.name }}</label>
+                </div>
+
+                <h3>選択されたファイルの行数</h3>
+                <div v-for="file in q10Files" :key="file.name + '-count'">
+                    <div v-if="q10Selected[file.name]">
+                        {{ file.name }} : {{ getLineCount(q10Contents, file.name) }} 行
+                    </div>
+                </div>
+            </div>
+            <br>
+            <button @click="backHome">トップページに戻る</button>
+        </div>
+
+        <div v-if="currentPage === 'q11'">
+            <h1>Q11. 先頭からN行を出力</h1>
+            <p>ファイルの先頭N行だけを表示する。</p>
+            <div>
+                <label><input type="file" multiple @change="onQ11FileUpload" /></label>
+            </div>
+            <div v-if="q11Files.length > 0">
+                <h3>表示するファイルを選択</h3>
+                <div v-for="file in q11Files" :key="file.name">
+                    <input type="checkbox" :id="file.name" v-model="q11Selected[file.name]" />
+                    <label :for="file.name">{{ file.name }}</label>
+                </div>
+
+                <h3>先頭{{ q11_displayLines }} 行の表示</h3>
+                <div class="slider">
+                    <label>表示桁数： {{ q11_displayLines }}</label><br>
+                    <input type="range" min="1" max="50" v-model.number="q11_displayLines" />
+                </div>
+            </div>
+
+            <div v-for="file in q11Files" :key="file.name + '-preview'">
+                <div v-if="q11Selected[file.name]">
+                    <h4>{{ file.name }}</h4>
+                    <pre>{{ getFirstNLines(q11Contents[file.name], q11_displayLines) }}</pre>
+                    <br>
+                </div>
+            </div>
+            <button @click="backHome">トップページに戻る</button>
+        </div>
+
+        <div v-if="currentPage === 'q12'">
+            <h1>Q12. 末尾のN行を出力</h1>
+            <p>ファイルの末尾N行だけを表示する。</p>
+            <div>
+                <label><input type="file" multiple @change="onQ12FileUpload"></label>
+            </div>
+            <div v-if="q12Files.length > 0">
+                <h3>表示するファイルを選択</h3>
+                <div v-for="file in q12Files" :key="file.name">
+                    <input type="checkbox" :id="file.name" v-model="q12Selected[file.name]" />
+                    <label :for="file.name">{{ file.name }}</label>
+                </div>
+
+                <h3>末尾{{ q12_displayLines }} 行の表示</h3>
+                <div class="slider">
+                    <label>表示行数： {{ q12_displayLines }}</label><br>
+                    <input type="range" min="1" max="50" v-model.number="q12_displayLines" />
+                </div>
+            </div>
+
+            <div v-for="file in q12Files" :key="file.name + '-preview'">
+                <div v-if="q12Selected[file.name]">
+                    <h4>{{ file.name }}</h4>
+                    <pre>{{ getLastNLines(q12Contents[file.name], q12_displayLines) }}</pre>
+                    <br>
+                </div>
+            </div>
+            <button @click="backHome">トップページに戻る</button>
+        </div>
+
+        <div v-if="currentPage === 'q13'">
+            <h1>Q13. タブをスペースに置換</h1>
+            <p>ファイル中のタブをスペースまたはカンマに置換する。<br>
+                注意：この問題では、複数ファイルの入力に対応していません。</p>
+            <div>
+                <label><input type="file" @change="onQ13FileUpload"></label>
+            </div>
+            
+            <div v-if="q13Files.length > 0">
+                <h3>置換先の文字を選択</h3>
+                <label>
+                    <input type="radio" value="space" v-model="tabReplaceChar" />半角スペース
+                </label>
+                <label>
+                    <input type="radio" value="comma" v-model="tabReplaceChar" />カンマ(,)
+                </label>
+            </div>
+
+            <div v-if="q13Files.length > 0" class="preview-container">
+                <div class="preview-column">
+                    <h4>元テキスト</h4>
+                    <pre> {{ getFirstNLines(q13Contents[q13Files[0].name], 10) }}</pre>
+                </div>
+
+                <div class="preview-column">
+                    <h4>変換後（タブ置換）</h4>
+                    <pre>{{ getTabReplacedFirst10(q13Contents[q13Files[0].name]) }}</pre>
+                    <button @click="downloadConverted(q13Files[0].name)">このファイルを保存する</button>
+                </div>
+            </div>
+            <button @click="backHome">トップページに戻る</button>
+        </div>
+
+        <div v-if="currentPage === 'q14'">
+            <h1>Q14. 1列目を出力</h1>
+            <p>ファイルの先頭10行に対して、各行のN列目だけを抜き出して表示する。</p>
+            <div>
+                <label><input type="file" @change="onQ14FileUpload"></label>
+            </div>
+
+            <div v-for="file in q14Files" :key="file.name">
+                <label>抽出する列番号:
+                    <input type="number" v-model.number="columnIndex" min="1">
+                </label>
+                <button @click="extractColumn(file.name)">抽出</button>
+                
+                <h4>出力結果（先頭10行）</h4>
+                <pre>{{ extractedResults[file.name] }}</pre>
+            </div>
+            <button @click="backHome">トップページに戻る</button>
+        </div>
+
+        <div v-if="['q15', 'q16', 'q17', 'q18', 'q19','q20','q21','q22','q23','q24','q25','q26','q27','q28','q29'].includes(currentPage)">
+            <h1>準備中</h1>
+            <p>現在、この問題の実装は準備中です。</p>
+            <button @click="backHome">トップページに戻る</button>
         </div>
 
     </div>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="app.js"></script>
 </body>
-
 </html>

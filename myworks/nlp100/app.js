@@ -1,4 +1,4 @@
-const { createApp, reactive, toRefs, computed, watch } = Vue;
+const { createApp, ref, reactive, toRefs, computed, watch } = Vue;
 
 createApp({
     setup(){
@@ -24,13 +24,6 @@ createApp({
                 <p>正規表現を用いてテキストを抽出・変換します。</p>
                 `,
                 questions: Array.from({ length: 10 }, (_, i) => i + 20) 
-            },
-            { 
-                title: "第4章: 言語解析", 
-                description: `
-                <p>基本的な言語解析を行います。</p>
-                `,
-                questions: Array.from({ length: 10 }, (_, i) => i + 30) 
             },
         ];
 
@@ -264,8 +257,155 @@ createApp({
         };
 
         //第二章
+
+        //--汎用関数--
+
+        //ファイルアップロード
+        const handleFileUpload = (event, filesRef, selectedMap, contentMap) => {
+            const files = event.target.files;
+            if (!files.length) return;
+            
+            filesRef.value = Array.from(files);
+            
+            filesRef.value.forEach(file => {
+                if (!(file.name in selectedMap)) selectedMap[file.name] = false;
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    contentMap[file.name] = e.target.result;
+                };
+                reader.readAsText(file);
+            });
+        };
         
-        
+        //行数カウント
+        const getLineCount = (fileContentsMap, fileName) => {
+            if (!fileContentsMap[fileName]) return 0;
+            return fileContentsMap[fileName].split(/\r?\n/).filter(line => line.trim() !== "").length;
+        };
+
+        //先頭n行取得
+        const getFirstNLines = (text, n) => {
+            if (!text) return "";
+            return text
+            .split(/\r?\n/)
+            .slice(0, n)
+            .join("\n");
+        };
+
+        //末尾n行取得
+        const getLastNLines = (text, n) => {
+            if (!text) return "";
+            const lines = text.split(/\r?\n/);
+            return lines.slice(-n).join("\n");
+        };
+
+        // タブを置換して先頭10行取得
+        const getTabReplacedFirst10 = (text) => {
+            if (!text) return "";
+            const first10 = text.split(/\r?\n/).slice(0, 10);
+            const replaceChar = tabReplaceChar.value === 'comma' ? ',' : ' ';
+            return first10.map(line => line.replace(/\t/g, replaceChar)).join("\n");
+        };
+
+        // 保存
+        const downloadConverted = (fileName) => {
+            const content = getTabReplacedFirst10(state_2.q13Contents[fileName]);
+            const blob = new Blob([content], { type: "text/plain" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName.replace(/\.[^/.]+$/, "") + "_converted.txt";
+            link.click();
+            URL.revokeObjectURL(link.href);
+        };
+
+        //------
+
+        const q10Files = ref([]);
+        const q10Selected = reactive({});
+        const q10Contents = reactive({});
+
+        const onQ10FileUpload = (event) => {
+            handleFileUpload(event, q10Files, q10Selected, q10Contents);
+        };
+
+        const q11Files = ref([]);
+        const q11Selected = reactive({});
+        const q11Contents = reactive({});
+
+        const onQ11FileUpload = (event) => {
+            handleFileUpload(event, q11Files, q11Selected, q11Contents);
+        };
+
+        const q11_displayLines = ref(10);
+
+
+        const q12Files = ref([]);
+        const q12Selected = reactive({});
+        const q12Contents = reactive({});
+
+        const onQ12FileUpload = (event) => {
+            handleFileUpload(event, q12Files, q12Selected, q12Contents);
+        };
+
+        const q12_displayLines = ref(10);
+
+        //Q13,Q14
+        const state_2 = reactive({
+            q13Files: [],
+            q13Selected: {},
+            q13Contents: {},
+
+            q14Files: [],
+            q14Selected: {},
+            q14Contents: {},
+            extractedResults: {},
+            columnIndex: 1,
+        });
+
+        const { q13Files, q13Selected, q13Contents } = toRefs(state_2);
+
+        const tabReplaceChar = ref('space');
+
+        const onQ13FileUpload = (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            q13Files.value = [file];
+            q13Selected.value[file.name] = true;
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                q13Contents.value[file.name] = e.target.result;
+            };
+            reader.readAsText(file);
+        };
+
+        const { q14Files, q14Selected, q14Contents, columnIndex, extractedResults } = toRefs(state_2);
+
+        const onQ14FileUpload = (event) => {
+          handleFileUpload(event, q14Files, q14Selected.value, q14Contents.value);
+        };
+
+        const extractColumn = (fileName) => {
+            const text = q14Contents.value[fileName];
+            if (!text) return;
+            
+            const lines = text.split(/\r?\n/).slice(0, 10);
+            const col = columnIndex.value - 1;
+            
+            const result = lines
+            .map(line => {
+                const cols = line.split("\t");
+                return cols[col] !== undefined ? cols[col] : "";
+            })
+            .join("\n");
+            
+            extractedResults.value[fileName] = result;
+        };
+
+
+
 
         //-----------------------------------------------------------------------------
 
@@ -291,6 +431,30 @@ createApp({
             q06_judge_y,
             q07_answer,
             q09_shuffle,
+            q10Files,
+            q10Selected,
+            q10Contents,
+            onQ10FileUpload,
+            getLineCount, 
+            onQ11FileUpload,
+            q11Files,
+            q11Selected,
+            q11Contents,
+            getFirstNLines,
+            q11_displayLines,
+            getLastNLines,
+            onQ12FileUpload,
+            q12Files,
+            q12Selected,
+            q12Contents,
+            q12_displayLines,
+            ...toRefs(state_2),
+            onQ13FileUpload,
+            tabReplaceChar,
+            getTabReplacedFirst10,
+            downloadConverted,
+            onQ14FileUpload,
+            extractColumn,
         }
 
     }

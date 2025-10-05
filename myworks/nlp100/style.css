@@ -96,3 +96,25 @@ textarea {
 textarea:focus {
   border-color: #f08c00;
 }
+
+/* Q11で使用 */
+.slider {
+  margin: 1em 0;
+}
+pre {
+  background: #f8f8f8;
+  padding: 0.5em;
+  border-radius: 6px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.preview-container {
+  display: flex;
+  gap: 2em;
+  margin-top: 1em;
+}
+
+.preview-column {
+  flex: 0 0 45%;
+}

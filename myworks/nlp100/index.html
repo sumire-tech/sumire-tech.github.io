@@ -38,12 +38,12 @@
             <h2 class="heading">実装目的・公式問題からの変更点</h2>
             <div class="center">
                 <p>
-                    本実装では、文字列/データをフロントエンドで簡単にかつ汎用的に処理できる技術を身に着けることを目的としています。<br>
+                    本実装では、シンプルな文字列/データ処理を通して、フロントエンド技術を身に着けることを目的としています。<br>
                     1つの具体例だけでなく、様々な入力や変数を試せるようにすることと、わかりやすいUIを意識しました。<br>
                 </p>
                 <p>
                     以上の目的に合わせて、ボタン操作やリアルタイムで出力が確認できる仕様、データ出力機能などを追加しており、公式の問題とは異なる箇所が存在します。<br>
-                    なお、公式の問題タイトルはそのまま使用しています。
+                    なお、公式の問題タイトルはそのまま使用しています。<br>
                 </p>
 
             </div>
@@ -54,7 +54,7 @@
 
             <section id="update-log">
                 <h4 class="heading">更新履歴</h4><br>
-                <p>2025/10/05 - 第2章Q10～Q14を公開</p>
+                <p>2025/10/09 - 第2章を公開</p>
                 <p>2025/10/02 - 第1章を公開</p>
                 <p>2025/10/01 - 制作開始</p>
 
@@ -328,7 +328,162 @@
             <button @click="backHome">トップページに戻る</button>
         </div>
 
-        <div v-if="['q15', 'q16', 'q17', 'q18', 'q19','q20','q21','q22','q23','q24','q25','q26','q27','q28','q29'].includes(currentPage)">
+        <div v-if="currentPage === 'q15'">
+            <h1>Q15. ファイルをN分割する</h1>
+            <p>ファイルを行単位でN分割し、別のファイルに格納する。</p>
+
+            <div>
+                <label><input type="file" @change="onQ15FileUpload"></label>
+            </div>
+            
+            <div v-if="q15Files.length > 0">
+                <h3>分割数を指定</h3>
+                <label>N = <input type="number" v-model.number="q15N" min="1"></label>
+                <div v-for="file in q15Files" :key="file.name">
+                    <h4>{{ file.name }}</h4>
+                    <button @click="splitFileByLines(file.name)">分割を実行</button>
+
+                    <div v-if="q15SplitResults[file.name]">
+                        <h4>結果</h4>
+                        <div v-for="(part, index) in q15SplitResults[file.name]" :key="index" class="split-preview">
+                            <p><strong>パート {{ index + 1 }}</strong>（{{ part.split('\n').length }} 行）</p>
+                            <pre>{{ part.split('\n').join('\n') }}</pre>
+                            <button @click="downloadSplitFile(file.name, index)">この部分を保存</button>
+                            <hr>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button @click="backHome">トップページに戻る</button>
+        </div>
+
+        <div v-if="currentPage === 'q16'">
+            <h1>Q16. ランダムに各行を並び替える</h1>
+            <p>ファイルを行単位でランダムに並び替える（各行の内容は変更しない）。</p>
+            <div>
+                <label><input type="file" multiple @change="onQ16FileUpload"></label>
+            </div>
+            <div v-for="file in q16Files" :key="file.name">
+                <h3>{{ file.name }}</h3>
+                <button @click="shuffleFileLines(file.name)">ランダム並べ替え</button>
+                
+                <pre v-if="q16ShuffledResults[file.name]">{{ q16ShuffledResults[file.name].split(/\r?\n/).join('\n') }}</pre>
+            </div>
+            <button @click="backHome">トップページに戻る</button>
+        </div>
+
+        <div v-if="currentPage === 'q17'">
+            <h1>Q17. 1列目の文字列の異なり</h1>
+            <p>ファイルの1列目の文字列について、文字列の種類を求め、アルファベット順に並べ、検索可能にする。<br>
+                注意: タブ区切りのファイルを想定しています。</p>
+            <div>
+                <label><input type="file" multiple @change="handleQ17Files"></label>
+            </div>
+
+            <h3>検索</h3>
+            <input type="text" v-model="searchQuery" placeholder="検索..." />
+            
+            <h3>結果一覧</h3>
+            <div ref="resultContainer" style="max-height:300px; overflow-y:auto; border:1px solid #ccc; padding:5px;">
+                <div v-for="(item, index) in filteredItems" :key="index" :ref="setItemRef">
+                    <span v-html="highlight(item)"></span>
+                </div>
+            </div>
+            <button @click="backHome">トップページに戻る</button>
+        </div>
+
+        <div v-if="currentPage === 'q18'">
+            <h1>Q18. 各行の1列目の文字列の出現頻度を求め、出現頻度の高い順に並べる</h1>
+            <p>各行の1列目の文字列の出現頻度を求め、HTMLのTable形式に整形して, 各カラムでのソートを可能にする。</p>
+            <div>
+                <label><input type="file" multiple @change="onQ18FileUpload"></label>
+            </div>
+
+            <div v-if="q18Files.length > 0">
+                <h3>表示するファイルを選択</h3>
+                <div v-for="file in q18Files" :key="file.name">
+                    <input type="checkbox" :id="file.name" v-model="q18.q18Selected[file.name]" />
+                    <label :for="file.name">{{ file.name }}</label>
+                </div>
+                <br>
+                <button @click="onQ18Analyze">出現頻度を集計して表を生成</button>
+            </div>
+            <div id="freqResult" style="margin-top:20px;"></div>
+
+            <button @click="backHome">トップページに戻る</button>
+        </div>
+
+        <div v-if="currentPage === 'q19'">
+            <h1>Q19. 3列目の数値の降順に各行を並び替える</h1>
+            <p>N列目の昇/降順に各行を並び替えて表にまとめ、PDFで表を保存する。</p>
+            <div>
+                <label><input type="file" multiple @change="onQ19FileUpload"></label>
+            </div>
+
+            <div v-if="q19Files.length > 0">
+                <h3>表示するファイルを選択</h3>
+                <p>注意：複数ファイル入力に対応していますが、あらたにファイルをアップロードしなおす前に、チェックボックスを外すようにしてください。</p>
+                <div v-for="file in q19Files" :key="file.name">
+                    <input type="checkbox" :id="file.name" v-model="q19.q19Selected[file.name]" />
+                    <label :for="file.name">{{ file.name }}</label>
+                </div>
+                <div id="q19Area">
+                    <h3>オプション選択・PDFプレビュー</h3>
+
+                        <div style="margin-bottom: 10px;">
+                            <label>
+                                ソート列番号（1から）：
+                                <input type="number" id="sortColumnInput" min="1" value="1" style="width: 60px;">
+                            </label>
+
+                            <label>
+                                並び順：
+                                <select id="sortOrderSelect">
+                                    <option value="asc">昇順</option>
+                                    <option value="desc">降順</option>
+                                </select>
+                            </label>
+
+                            <label>
+                                比較言語：
+                                <select id="sortLocaleSelect">
+                                    <option value="en">英語（アルファベット順）</option>
+                                    <!-- フォントがダウンロードできる場合、他のオプション（日本語など）を追加できます -->
+                                </select>
+                            </label>
+
+                            <label>
+                                大文字小文字の扱い：
+                                <select id="caseSensitiveSelect">
+                                    <option value="base">区別しない（A=a）</option>
+                                    <option value="variant">区別する（A≠a）</option>
+                                </select>
+                            </label>
+
+                            <label>
+                                無効データ：
+                                <select id="invalidDataSelect">
+                                    <option value="keep">保持する</option>
+                                    <option value="remove">削除する</option>
+                                </select>
+                            </label>
+                        </div>
+
+                        <button @click="onQ19SortPreview">ソートしてPDFプレビュー</button>
+                        <button @click="onQ19DownloadPDF" style="margin-left: 10px;">PDFをダウンロード</button>
+
+                        <div id="pdfPreviewArea" style="margin-top: 20px;">
+                            <iframe id="pdfPreview" width="100%" height="600px" style="border:1px solid #ccc;"></iframe>
+                        </div>
+                </div>
+            </div>
+
+            <button @click="backHome">トップページに戻る</button>
+        </div>
+
+
+
+        <div v-if="['q20','q21','q22','q23','q24','q25','q26','q27','q28','q29'].includes(currentPage)">
             <h1>準備中</h1>
             <p>現在、この問題の実装は準備中です。</p>
             <button @click="backHome">トップページに戻る</button>
@@ -336,6 +491,10 @@
 
     </div>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+
     <script src="app.js"></script>
 </body>
 </html>

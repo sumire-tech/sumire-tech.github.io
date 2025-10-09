@@ -1,4 +1,4 @@
-const { createApp, ref, reactive, toRefs, computed, watch } = Vue;
+const { createApp, ref, reactive, toRefs, computed, watch, nextTick } = Vue;
 
 createApp({
     setup(){
@@ -350,7 +350,7 @@ createApp({
 
         const q12_displayLines = ref(10);
 
-        //Q13,Q14
+        //Q13,Q14,Q15,Q16,Q17
         const state_2 = reactive({
             q13Files: [],
             q13Selected: {},
@@ -361,6 +361,15 @@ createApp({
             q14Contents: {},
             extractedResults: {},
             columnIndex: 1,
+
+            q15Files: [],
+            q15Contents: {},
+            q15N: 2,
+            q15SplitResults: {},
+
+            q16Files: [],
+            q16Contents: {},
+            q16ShuffledResults: {},
         });
 
         const { q13Files, q13Selected, q13Contents } = toRefs(state_2);
@@ -403,6 +412,369 @@ createApp({
             
             extractedResults.value[fileName] = result;
         };
+
+
+        const { q15Files, q15Contents, q15N, q15SplitResults } = toRefs(state_2);
+
+        const onQ15FileUpload = (event) => {
+            handleFileUpload(event, q15Files, {}, q15Contents.value);
+        };
+        
+        
+        const splitFileByLines = (fileName) => {
+            const content = q15Contents.value[fileName];
+            if (!content) return;
+            const lines = content.split(/\r?\n/).filter(l => l.length > 0);
+            const totalLines = lines.length;
+            const n = Math.max(1, parseInt(q15N.value));
+            const chunkSize = Math.ceil(totalLines / n);
+            
+            q15SplitResults.value[fileName] = [];
+            for (let i = 0; i < n; i++) {
+                const chunk = lines.slice(i * chunkSize, (i + 1) * chunkSize).join('\n');
+                q15SplitResults.value[fileName].push(chunk);
+            }
+        };
+
+        const downloadSplitFile = (fileName, index) => {
+            const part = q15SplitResults.value[fileName][index];
+            const blob = new Blob([part], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${fileName}_part${index + 1}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        };
+
+        const { q16Files, q16Contents, q16ShuffledResults } = toRefs(state_2);
+
+        const onQ16FileUpload = (event) => {
+            handleFileUpload(event, q16Files, {}, q16Contents.value);
+        };
+
+        const shuffleFileLines = (filename) => {
+            let content = q16Contents.value[filename];
+            if (!content) return;
+            
+            content = content.replace(/\r\n/g, '\n');
+            const lines = content
+            .split('\n')
+            .map(line => line.trimEnd())
+            .filter(line => line.length > 0);
+            
+            for (let i = lines.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [lines[i], lines[j]] = [lines[j], lines[i]];
+            }
+            
+            q16ShuffledResults.value[filename] = lines.join('\n');
+        };
+
+        const q17Files = ref([]);
+        const allItems = ref([]);
+        const searchQuery = ref('');
+        const resultContainer = ref(null);
+        const itemRefs = ref([]);
+
+        const handleQ17Files = async (event) => {
+            const uploaded = Array.from(event.target.files);
+            let itemsSet = new Set();
+            
+            for (const file of uploaded) {
+                const text = await file.text();
+                const lines = text.split(/\r?\n/);
+                
+                for (const line of lines) {
+                    if (!line) continue;
+                    const firstColumn = line.split('\t')[0];
+                    itemsSet.add(firstColumn);
+                }
+            }
+            allItems.value = Array.from(itemsSet).sort((a,b) => a.localeCompare(b));
+        };
+
+        // itemRefsの更新
+        const setItemRef = (el) => {
+            if (el) itemRefs.value.push(el);
+        };
+        
+        const filteredItems = computed(() => {
+            if (!searchQuery.value) return allItems.value;
+            return allItems.value.filter(item => item.includes(searchQuery.value));
+        });
+
+        // mark 付与
+        const highlight = (item) => {
+            if (!searchQuery.value) return item;
+            // 正規表現で全ての一致箇所を <mark> にする
+            const re = new RegExp(`(${searchQuery.value})`, 'gi'); // 大文字小文字無視したい場合は 'i'
+            return item.replace(re, '<mark>$1</mark>');
+        };
+        
+        watch([searchQuery, filteredItems], async () => {
+            await nextTick();
+            
+            if (filteredItems.value.length > 0) {
+                const firstEl = itemRefs.value.find(el =>
+                    el.innerText.toLowerCase().includes(searchQuery.value.toLowerCase())
+                );
+                
+                if (firstEl && resultContainer.value) {
+                    resultContainer.value.scrollTop =
+                    firstEl.offsetTop - resultContainer.value.offsetTop;
+                }
+            }
+            itemRefs.value = []; // 次の更新に備えてリセット
+        });
+
+
+        const q18 = reactive({
+            q18Contents: {},
+            q18Selected: {},
+        });
+
+        const q18Files = ref([]);
+
+        const onQ18FileUpload = (event) => {
+            handleFileUpload(event, q18Files, q18.q18Selected, q18.q18Contents);
+        };
+
+        const q18countFirstColFreq = (contents, selected) => {
+            const freq = {};
+            for (const [fileName, text] of Object.entries(contents)) {
+                if (!selected[fileName]) continue;
+                const lines = text.split(/\r?\n/).filter(l => l.trim() !== '');
+                for (const line of lines) {
+                    const first = line.split(/\t|,/)[0].trim();
+                    if (!first) continue;
+                    freq[first] = (freq[first] || 0) + 1;
+                }
+            }
+            return freq;
+        };
+
+        const generateSortableTable = (freq) => {
+            const entries = Object.entries(freq);
+            const rows = entries
+                .map(([str, count]) =>
+                    `<tr><td>${count}</td><td>${str}</td></tr>`
+                ).join('\n')
+
+            return `
+            <p>ヘッダーをクリックしてソートできます。</p>
+            <table id="freqTable" border="1" style="border-collapse:collapse; width:50%" class="table-freq">
+                <thead>
+                    <tr>
+                        <th onclick="sortTable(0, 'int')">出現頻度</th>
+                        <th onclick="sortTable(1, 'str')">文字列</th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>
+            `
+        };
+
+
+        const onQ18Analyze = () => {
+            console.log(q18.q18Contents);
+            const freq = q18countFirstColFreq(q18.q18Contents, q18.q18Selected);
+            const tableHTML = generateSortableTable(freq);
+            document.getElementById("freqResult").innerHTML = tableHTML;
+        };
+
+        window.sortDir = window.sortDir || {}; // 列ごとの方向を保持
+
+        const sortTable = (n, type) => {
+            const table = document.getElementById("freqTable");
+            if (!table) return;
+
+            // 前回の方向を取得、なければ asc
+            let dir = window.sortDir[n] || "asc";
+            let switching = true;
+
+            while (switching) {
+                switching = false;
+                const rows = table.rows;
+
+                for (let i = 1; i < rows.length - 1; i++) {
+                    let x = rows[i].getElementsByTagName("TD")[n];
+                    let y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                    let xVal = type === "int" ? parseInt(x.textContent) : x.textContent.toLowerCase();
+                    let yVal = type === "int" ? parseInt(y.textContent) : y.textContent.toLowerCase();
+
+                    if ((dir === "asc" && xVal > yVal) || (dir === "desc" && xVal < yVal)) {
+                        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                        switching = true;
+                        break;
+                    }
+                }
+            }
+
+            // ヘッダーの矢印クラスを更新
+            const ths = table.getElementsByTagName("TH");
+            for (let i = 0; i < ths.length; i++) {
+                ths[i].classList.remove("sorted-asc", "sorted-desc");
+            }
+            ths[n].classList.add(dir === "asc" ? "sorted-asc" : "sorted-desc");
+
+            // ソート方向を反転して保存
+            window.sortDir[n] = dir === "asc" ? "desc" : "asc";
+        };
+
+        window.sortTable = sortTable;
+
+
+        //Q19
+
+        const q19 = reactive({
+            q19Contents: {},
+            q19Selected: {},
+        });
+        const q19Files = ref([]);
+
+        const onQ19FileUpload = (event) => {
+            handleFileUpload(event, q19Files, q19.q19Selected, q19.q19Contents);
+        };
+
+        // ===== ソート関数 =====
+        const sortTableData = (
+            textContent,
+            colIndex,
+            order = 'asc',
+            locale = 'en',
+            caseSensitivity = 'base',
+            removeInvalid = false
+        ) => {
+            let lines = textContent.trim().split(/\r?\n/);
+            let rows = lines.map(line => line.split('\t'));
+            if (rows.length === 0 || colIndex < 0) return rows;
+
+        // 無効データ削除
+            if (removeInvalid) {
+                rows = rows.filter(r => {
+                    const val = r[colIndex]?.trim() ?? '';
+                    return val !== '' && (
+                        !isNaN(parseFloat(val)) ||
+                        /[A-Za-zぁ-んァ-ヶ一-龠]/.test(val)
+                    );
+                });
+            }
+
+            rows.sort((a, b) => {
+                const x = a[colIndex] ?? '';
+                const y = b[colIndex] ?? '';
+
+                const isNumX = !isNaN(parseFloat(x)) && x.trim() !== '';
+                const isNumY = !isNaN(parseFloat(y)) && y.trim() !== '';
+
+                let cmp = 0;
+                if (isNumX && isNumY) {
+                    cmp = parseFloat(x) - parseFloat(y);
+                } else {
+                    cmp = x.toString().localeCompare(
+                        y.toString(),
+                        locale,
+                        { sensitivity: caseSensitivity, numeric: true }
+                    );
+                }
+
+                return order === 'asc' ? cmp : -cmp;
+            });
+
+            return rows;
+        };
+
+        // ===== PDF生成関数（共通処理） =====
+        const generateSortedPDF = (rows, fileNames=[]) => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(14);
+
+            const titleText = fileNames.length === 1
+            ? `Sorted Table: ${fileNames[0]}`
+            : `Sorted Table (${fileNames.length} files): ${fileNames.join(", ")}`;
+            
+            doc.text(titleText, 14, 15);
+
+            doc.autoTable({
+                body: rows, // 先頭行もデータとして扱う
+                styles: { fontSize: 8 },
+                margin: { top: 20 },
+                headStyles: {
+                    fillColor: [255, 255, 255],
+                    textColor: [0, 0, 0],
+                },
+                bodyStyles: {
+                    fillColor: [255, 255, 255],
+                    textColor: [0, 0, 0],
+                },
+            });
+
+            return doc;
+        };
+
+        // ===== 設定値の取得（共通） =====
+        const getSortSettings = () => {
+            const colIndex = parseInt(document.getElementById("sortColumnInput").value) - 1;
+            const order = document.getElementById("sortOrderSelect").value;
+            const locale = document.getElementById("sortLocaleSelect").value;
+            const caseSensitivity = document.getElementById("caseSensitiveSelect").value;
+            const removeInvalid = document.getElementById("invalidDataSelect").value === "remove";
+            return { colIndex, order, locale, caseSensitivity, removeInvalid };
+        };
+
+        // ===== PDFプレビュー表示 =====
+        
+        const onQ19SortPreview = () => {
+            const { colIndex, order, locale, caseSensitivity, removeInvalid } = getSortSettings();
+
+            const selectedFiles = Object.keys(q19.q19Selected).filter(f => q19.q19Selected[f]);
+            if (selectedFiles.length === 0) {
+                alert("ファイルを選択してください。");
+                return;
+            }
+
+            let combinedText = '';
+            selectedFiles.forEach(name => {
+                combinedText += q19.q19Contents[name] + '\n';
+            });
+
+            const sortedRows = sortTableData(combinedText, colIndex, order, locale, caseSensitivity, removeInvalid);
+
+            // PDF生成
+            const doc = generateSortedPDF(sortedRows, selectedFiles);
+            const pdfBlob = doc.output("blob");
+            const pdfUrl = URL.createObjectURL(pdfBlob);
+
+            // プレビューに埋め込み
+            document.getElementById("pdfPreview").src = pdfUrl;
+
+            // 一時的にURL保持（ダウンロード時に再利用）
+            window.q19PDFBlobUrl = pdfUrl;
+        };
+        
+        // ===== PDFダウンロード =====
+        const onQ19DownloadPDF = () => {
+            if (!window.q19PDFBlobUrl) {
+                alert("まずPDFプレビューを生成してください。");
+            return;
+            }
+
+            // Blob URL からダウンロードを実行
+            const link = document.createElement("a");
+            link.href = window.q19PDFBlobUrl;
+            link.download = "sorted_table.pdf";
+            link.click();
+        };
+
+
+
+
+
 
 
 
@@ -455,6 +827,32 @@ createApp({
             downloadConverted,
             onQ14FileUpload,
             extractColumn,
+            onQ15FileUpload,
+            splitFileByLines,
+            downloadSplitFile,
+            onQ16FileUpload,
+            shuffleFileLines,
+            q17Files,
+            allItems,
+            searchQuery,
+            resultContainer,
+            itemRefs,
+            handleQ17Files,
+            filteredItems,
+            highlight,
+            setItemRef,
+            q18,
+            q18Files,
+            onQ18FileUpload,
+            q18countFirstColFreq,
+            generateSortableTable,
+            onQ18Analyze,
+            sortTable,
+            q19,
+            onQ19FileUpload,
+            q19Files,
+            onQ19SortPreview,
+            onQ19DownloadPDF,
         }
 
     }

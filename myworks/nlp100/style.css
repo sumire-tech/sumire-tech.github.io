@@ -118,3 +118,64 @@ pre {
 .preview-column {
   flex: 0 0 45%;
 }
+
+.highlight mark { /* q17 ハイライト用 */
+    background-color: yellow;
+}
+
+/* Q18のテーブル */
+
+.table-freq th {
+    background-color: #eda831;
+    color: rgb(0, 0, 0);
+    cursor: pointer;
+    text-align: center;   /* 文字＋矢印を中央揃え */
+    padding: 6px 12px;
+    position: relative;
+}
+
+/* 上矢印と下矢印をインラインで文字の右に表示 */
+.table-freq th::before,
+.table-freq th::after {
+    font-size: 0.7em;
+    margin-left: 4px; /* 文字との間隔 */
+}
+
+/* 上矢印 */
+.table-freq th::before {
+    content: "▲";
+    color: black; 
+}
+
+/* 下矢印 */
+.table-freq th::after {
+    content: "▼";
+    color: black; 
+}
+
+/* 昇順ソート中は上矢印を黄色に */
+.table-freq th.sorted-asc::before {
+    color: rgb(255, 255, 255);
+}
+
+/* 降順ソート中は下矢印を黄色に */
+.table-freq th.sorted-desc::after {
+    color: rgb(255, 255, 255);
+}
+
+/* テーブル全体 */
+.table-freq {
+    border-collapse: collapse;
+    width: 50%;
+    margin: 20px auto; /* 横中央 */
+}
+
+.table-freq th, .table-freq td {
+    border: 1px solid #666;
+    padding: 6px 12px;
+    text-align: center;
+}
+
+.table-freq tr:nth-child(even) {
+    background-color: #fafafa;
+}

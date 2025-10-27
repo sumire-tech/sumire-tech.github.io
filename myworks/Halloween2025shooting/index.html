@@ -7,9 +7,15 @@
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
   </head>
-  <body>
-    <div id="unity-container" class="unity-desktop">
-      <canvas id="unity-canvas" width=960 height=540 tabindex="-1"></canvas>
+  <body style="text-align: center; padding: 20px;">
+    <!-- Unity部分（固定サイズ） -->
+    <div id="unity-container" class="unity-desktop" style="
+      display: block;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    ">
+      <canvas id="unity-canvas" width=960 height=540 tabindex="-1" style="display: block; margin: 0 auto;"></canvas>
       <div id="unity-loading-bar">
         <div id="unity-logo"></div>
         <div id="unity-progress-bar-empty">
@@ -23,16 +29,19 @@
         <div id="unity-build-title">Halloween2025</div>
       </div>
     </div>
-    
+
+    <!-- ★テキスト部分（Unityの下に完全に分離★ -->
     <div style="
-      margin-top: 20px;
+      margin-top: 30px;
       text-align: left;
-      font-family: sans-serif;
       max-width: 960px;
       margin-left: auto;
       margin-right: auto;
       padding: 20px;
-      border-top: 1px solid #ccc;
+      font-family: sans-serif;
+      background-color: #f9f9f9;
+      border-radius: 8px;
+      box-sizing: border-box;
     ">
       <h3>遊び方</h3>
       <p>A:左　W:ジャンプ　D:右　Enter:攻撃</p>

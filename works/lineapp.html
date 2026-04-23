@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Project</title>
+
+<style>
+:root{
+  --bg:#f8fafc;
+  --text:#1e2025;
+  --muted:#81868c;
+  --nav:#212328;
+}
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:"Inter","Noto Sans JP",system-ui,-apple-system,sans-serif;
+}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.95;
+}
+
+/* ===== TOP BAR（ホーム完全準拠） ===== */
+.top-bar{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:56px;
+  background:var(--nav);
+  border-bottom:1px solid rgba(255,255,255,0.06);
+  display:flex;
+  align-items:center;
+  padding:0 20px;
+  box-sizing:border-box;
+  z-index:1000;
+}
+
+.back-link{
+  color:#9ca3af;
+  font-size:14px;
+  text-decoration:none;
+  transition:0.2s;
+}
+
+.back-link:hover{
+  color:#ffffff;
+}
+
+/* ===== コンテンツアニメ ===== */
+.content{
+  padding-top:100px;
+  opacity:0;
+  transform:translateY(18px);
+  transition:0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.content.is-active{
+  opacity:1;
+  transform:translateY(0);
+}
+
+.content.is-leaving{
+  opacity:0;
+  transform:translateY(10px);
+}
+
+/* ===== レイアウト ===== */
+.container{
+  max-width:700px;
+  margin:auto;
+  padding:0 20px 60px;
+}
+
+/* ===== タイトル ===== */
+.title{
+  font-size:26px;
+  font-weight:700;
+  margin-bottom:6px;
+}
+
+.meta{
+  font-size:12px;
+  color:var(--muted);
+  display:flex;
+  gap:10px;
+  margin-bottom:22px;
+}
+
+/* ===== セクション ===== */
+.section{
+  margin-bottom:26px;
+  padding-top:10px;
+  border-top:1px solid rgba(226,232,240,0.8);
+}
+
+.section h3{
+  font-size:14px;
+  margin-bottom:8px;
+  color:#333;
+}
+
+.section p{
+  font-size:15px;
+  color:var(--text);
+  line-height:1.8;
+}
+
+/* ===== タグ ===== */
+.tags span{
+  display:inline-block;
+  font-size:11px;
+  padding:2px 8px;
+  border-radius:999px;
+  background:#f1f5f9;
+  border:1px solid #e2e8f0;
+  color:var(--muted);
+  margin:3px;
+}
+
+/* ===== 画像 ===== */
+img {
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+  border-radius: 10px;
+  margin-top: 10px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.item a{
+  position:relative;
+  display:inline-flex;
+  align-items:center;
+  font-weight:500;
+  color:#81868c;
+  text-decoration:none;
+  transition:0.2s ease;
+}
+
+.item a::after{
+  content:"↗";
+  margin-left:6px;
+  font-size:13px;
+  color:inherit;
+  opacity:0;
+  transform:translate(-2px,2px);
+  transition:0.2s ease;
+}
+
+.item a:hover{
+  color:#1e2025;
+}
+
+.item a:hover::after{
+  opacity:1;
+  transform:translate(0,0);
+}
+
+ul.custom-list{
+  list-style:none;
+  padding:0;
+  margin:20px auto;
+  max-width:600px;
+}
+
+ul.custom-list li{
+  position:relative;
+  padding:10px 14px 10px 28px; /* 左に余白 */
+  margin-bottom:10px;
+
+  font-size:14px;
+  color:#4b5563;
+
+  background:#f1f5f9;
+  border:1px solid #e2e8f0;
+  border-radius:8px;
+}
+
+/* カスタムの点 */
+ul.custom-list li::before{
+  content:"";
+  position:absolute;
+  left:10px;
+  top:50%;
+  transform:translateY(-50%);
+  width:6px;
+  height:6px;
+  background:#777c86;
+  border-radius:50%;
+}
+</style>
+
+</head>
+
+<body>
+
+<!-- NAV -->
+<div class="top-bar">
+  <a class="back-link" href="#" id="back">← Back</a>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <div class="container">
+
+    <h1 class="title">サークルスケジュール管理LINEアプリケーションの構築</h1>
+
+    <div class="meta">
+      <span>2025</span>
+      <span>実装報告</span>
+    </div>
+
+    <div class="section">
+      <h3>概要</h3>
+      <p>
+        所属するサークルのスケジュール管理を効率化するためのLINEアプリケーションを構築しました。
+      </p>
+    </div>
+
+    <div class="section">
+      <h3>技術</h3>
+      <div class="tags">
+        <span>HTML/CSS/JavaScript</span>
+        <span>LINE Bot/LINE Messaging API</span>
+        <span>CloudFlare Pages＆Workers</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>背景</h3>
+      <p>
+        私が所属するサークルでは、LINEグループのノート機能で、毎月スケジュールを投稿し、返信を通じてサークル会館の鍵を借りたことを報告していました。
+        また、調整さんというサイトを利用して、出欠確認を取っています。<br>
+        従来の方法では、主にスケジュールの作成において、日付の確認や、追加の日程などがあった際に手打ちで対応する必要がありました。<br>
+        そこで、スケジュール管理を効率化するためのLINEアプリケーションを構築することにしました。
+      </p>
+    </div>
+
+    <div class="section">
+      <h3>主な機能</h3>
+      <ul class="custom-list">
+        <li>スケジュールの作成・編集機能</li>
+        <li>鍵の管理コメント投稿機能</li>
+        <li>調整さんへ飛ぶリンクを貼る機能</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h3>スケジュール画面</h3>
+      <div class ="img">
+        <img src = "images/schedulepage.jpg" alt="スケジュール画面">
+      </div>
+      <br>
+      <p>
+        通知コメント：<br>
+        画面上部のコメント（「新歓の予定確認お願いします！」の箇所）
+        毎月重要事項があればここに記載する。
+        <br><br>
+        スケジュール：<br>
+        日程・部屋を確認できる画面。
+      </p>
+    </div>
+
+    <div class="section">
+      <h3>鍵管理・調整さんリンク</h3>
+      <div class="img">
+        <img src = "images/keyandchoseisan.png" alt="鍵管理・調整さんリンク">
+      </div>
+      <br>
+      <p>
+        鍵状況：<br>
+        鍵を借りた際にコメントを入力して投稿する箇所。投稿時間を確認して、鍵の状況を知ることができる。
+        <br><br>
+        調整さんリンク：<br>
+        毎月練習の出欠を調整さんでとっているため、URLを入力して変更ボタンを押すことで、この画面から調整さんにすぐ飛ぶことができる。
+      </p>
+    </div>
+
+    <div class="section">
+      <h3>スケジュール編集画面</h3>
+      <div class="img">
+        <img src="images/scheduleedit1.jpg" alt="スケジュール編集画面1">
+      </div>
+      <br>
+      <p>
+        スケジュール選択画面：<br>
+        スケジュールボタンを押すと、上記画面に遷移する。現在の月とその前後の月の3か月分のスケジュールが登録されているかを確認でき、編集したい月を選択して編集画面に遷移する。
+      </p>
+      <br><br>
+      <div class="img">
+        <img src="images/scheduleedit2.jpg" alt="スケジュール編集画面2">
+      </div>
+      <br>
+      <p>
+        スケジュール編集画面：<br>
+        基本の活動日程・活動する部屋が標準で入力されており、そこから変更があれば変更する。新たに日程を追加したり削除したりできる。
+      </p>
+    </div>
+
+    <div class="section">
+      <h3>認証</h3>
+      <div class="img">
+        <img src="images/auth.jpg" alt="認証画面">
+      </div>
+      <br>
+      <p>
+        認証画面：<br>
+        LINEアプリのため、LINEアカウントでのログインが必要なことに加え、サークルメンバーにのみ配布する認証キーを入力することで、スケジュールの編集や鍵に関するコメントを投稿できるようにしている。
+      </p>
+    </div>
+
+    <div class="section">
+      <h3>LINE公式アカウント</h3>
+      <div class="img">
+        <img src="images/linebot.jpg" alt="LINE公式アカウント画面">
+      </div>
+      <br>
+      <p>
+        LINE公式アカウント：<br>
+        公式アカウントでは、スケジュールが更新された際に通知が来るようになっている。
+      </p>
+    </div>
+
+    <div class="section">
+      <h3>課題</h3>
+      <p>
+        以下のような課題が残りました。
+        <ul class="custom-list">
+          <li>ホワイトリスト(認証されたユーザーリスト)に情報が無期限で残るので、OBOGになったあとも権限が残ってしまう</li>
+          <li>調整さんが複数になる月（定期演奏会関係など）に対応できていない</li>
+          <li>鍵借りました投稿が、n時間前、n日前の表示のほうがわかりやすい</li>
+        </ul>
+      </p>
+    </div>
+  </div>
+
+</div>
+
+<!-- JS -->
+<script>
+const content = document.querySelector(".content");
+const back = document.getElementById("back");
+
+/* 入場 */
+window.addEventListener("load", () => {
+  requestAnimationFrame(() => {
+    content.classList.add("is-active");
+  });
+});
+
+/* 退出 */
+back.addEventListener("click", (e) => {
+  e.preventDefault();
+
+  content.classList.add("is-leaving");
+
+  content.addEventListener("transitionend", () => {
+    history.back();
+  }, { once: true });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Portfolio</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#f8fafc;
+      --text:#1e2025;
+      --muted:#81868c;
+      --nav:#212328;
+    }
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:"Inter","Noto Sans JP",system-ui,-apple-system,sans-serif;
+    }
+
+    body{
+      background:var(--bg);
+      color:var(--text);
+      line-height:1.95;
+    }
+
+    a{
+      color:inherit;
+      text-decoration:none;
+    }
+
+    a:hover{
+      color:#334155;
+    }
+
+    /* NAV */
+    header{
+      position:fixed;
+      top:0;
+      left:0;
+      width:100%;
+      background:var(--nav);
+      z-index:1000;
+      border-bottom:1px solid rgba(255,255,255,0.06);
+    }
+
+    .nav{
+      max-width:1100px;
+      margin:auto;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:14px 20px;
+    }
+
+    .logo{
+      color:#e5e7eb;
+      font-weight:600;
+    }
+
+    .menu{
+      display:flex;
+      gap:18px;
+    }
+
+    .menu a{
+      font-size:14px;
+      color:#9ca3af;
+      transition:0.2s;
+    }
+
+    .menu a.active{
+      color:#ffffff;
+    }
+
+    /* layout */
+    .container{
+      max-width:1100px;
+      margin:auto;
+      padding:120px 20px 60px;
+      display:grid;
+      grid-template-columns:300px 1fr;
+      gap:60px;
+    }
+
+    /* LEFT */
+    .profile{
+      position:sticky;
+      top:120px;
+    }
+
+    .name-block{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:4px;
+    }
+
+    .name{
+      font-size:42px;
+      font-weight:700;
+      line-height:1.05;
+      text-align:center;
+    }
+
+    .roman{
+      font-size:14px;
+      color:var(--muted);
+      letter-spacing:1px;
+      text-align:center;
+    }
+
+    .affiliation{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:14px;
+      text-align:center;
+    }
+
+    /* RIGHT */
+    section{
+      margin-bottom:80px;
+      scroll-margin-top:100px;
+      padding-top:10px;
+      border-top:1px solid rgba(226,232,240,0.8);
+    }
+
+    .heading{
+      display:flex;
+      align-items:baseline;
+      gap:12px;
+      margin-bottom:18px;
+    }
+
+    h2{
+      font-size:18px;
+      font-weight:600;
+    }
+
+    .subtitle{
+      font-size:11px;
+      color:var(--muted);
+      letter-spacing:1.5px;
+    }
+
+    .item{
+      margin-bottom:18px;
+      font-size:15px;
+    }
+
+    /* link arrow */
+    .item a{
+      position:relative;
+      display:inline-flex;
+      align-items:center;
+      font-weight:500;
+    }
+
+    .item a::after{
+      content:"↗";
+      margin-left:6px;
+      font-size:13px;
+      color:var(--muted);
+      opacity:0;
+      transform:translate(-2px,2px);
+      transition:0.2s ease;
+    }
+
+    .item a:hover::after{
+      opacity:1;
+      transform:translate(0,0);
+    }
+
+    /* paper meta */
+    .meta{
+      margin-top:6px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .tag{
+      font-size:11px;
+      padding:2px 8px;
+      border-radius:999px;
+      background:#f1f5f9;
+      border:1px solid #e2e8f0;
+      color:var(--muted);
+    }
+
+    footer{
+      text-align:center;
+      color:var(--muted);
+      font-size:12px;
+      padding:50px 0;
+    }
+
+    @media(max-width:900px){
+      .container{
+        grid-template-columns:1fr;
+      }
+
+      .profile{
+        position:static;
+        margin-bottom:40px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="nav">
+    <div class="logo"></div>
+
+    <nav class="menu">
+      <a href="#about">プロフィール</a>
+      <a href="#papers">研究</a>
+      <a href="#works">プロジェクト</a>
+      <a href="#contact">リンク</a>
+    </nav>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- LEFT -->
+  <div class="profile">
+
+    <div class="name-block">
+      <div class="name">中川 菫</div>
+      <div class="roman">Nakagawa Sumire</div>
+    </div>
+
+    <div class="affiliation">小樽商科大学 社会情報学科 B2</div>
+
+  </div>
+
+  <!-- RIGHT -->
+  <div>
+
+    <section id="about">
+      <div class="heading">
+        <h2>プロフィール</h2>
+        <div class="subtitle">ABOUT ME</div>
+      </div>
+
+      <div class="item">
+        2025年 小樽商科大学入学<br>
+        主に大規模視覚言語モデル(LVLM)や、その周辺(マルチモーダル領域)、大規模・複雑な非/半構造化データの処理に興味があります。
+      </div>
+    </section>
+
+    <section id="papers">
+      <div class="heading">
+        <h2>研究</h2>
+        <div class="subtitle">RESEARCH</div>
+      </div>
+
+      <div class="item">
+        <a href="https://www.anlp.jp/proceedings/annual_meeting/2026/pdf_dir/P5-1.pdf" target="_blank">DAGRI Subtask 3: 栽培暦を対象としたFigures and Tables Question Answering (FiT-QA)の提案</a>
+        <div class="meta">
+          <span class="tag">主著</span>
+          <span>中川 菫, 木村 泰知 (小樽商大), 會田 勇斗, 高橋 洸丞 (ストックマーク), 門脇 一真 (日本総研), 小林 暁雄, 大友 将宏, 石原 潤一, 馬場 研太, 桂樹 哲雄 (農研機構)</span>
+          <span>言語処理学会第32回年次大会(NLP2026)</span>
+        </div>
+      </div>
+
+      <div class="item">
+        <a href="https://www.anlp.jp/proceedings/annual_meeting/2026/pdf_dir/P5-2.pdf" target="_blank">農業分野の栽培暦VQAデータセットの構築 —LLMのマルチモーダル質問自動生成能力の評価—</a>
+        <div class="meta">
+          <span class="tag">共著</span>
+          <span>宮脇 一輝 (小樽商大), 會田 勇斗, 高橋 洸丞 (ストックマーク), 中川 菫, 木村 泰知 (小樽商大), 門脇 一真 (日本総研), 小林 暁雄, 大友 将宏, 石原 潤一, 馬場 研太, 桂樹 哲雄 (農研機構)</span>
+          <span>言語処理学会第32回年次大会(NLP2026)</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="works">
+      <div class="heading">
+        <h2>プロジェクト</h2>
+        <div class="subtitle">PROJECTS</div>
+      </div>
+
+      <div class="item">
+        <a href="works/lineapp.html">サークルスケジュール管理LINEアプリケーションの構築</a>
+        <span class="tag">実装報告</span>
+      </div>
+
+      <div class="item">
+        <a href="works/ocrblog.html">OCRモデルの日本語性能比較・検証</a>
+        <span class="tag">技術ブログ</span>
+      </div>
+
+      <div class="item">
+        <a href="works/3dscanning.html">小樽商大3Dスキャニングプロジェクト</a>
+        <span class="tag">プロジェクト参加</span>
+      </div>
+
+      <div class="item">
+        <a href="works/shootinggame.html">2Dシューティングゲームの製作</a>
+        <span class="tag">ゲーム制作</span>
+      </div>
+
+    </section>
+
+    <section id="contact">
+      <div class="heading">
+        <h2>リンク</h2>
+        <div class="subtitle">LINKS</div>
+      </div>
+
+      <div class="item">
+        <a href="https://github.com/sumire-tech" target="_blank">GitHub</a>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<footer></footer>
+
+<script>
+  const sections = document.querySelectorAll("section");
+  const links = document.querySelectorAll(".menu a");
+
+  window.addEventListener("scroll", () => {
+    let closest = null;
+    let minDist = Infinity;
+
+    const center = window.innerHeight / 2;
+
+    sections.forEach(sec => {
+      const rect = sec.getBoundingClientRect();
+      const secCenter = rect.top + rect.height / 2;
+
+      const dist = Math.abs(secCenter - center);
+
+      if (dist < minDist) {
+        minDist = dist;
+        closest = sec;
+      }
+    });
+
+    links.forEach(link => {
+      link.classList.remove("active");
+
+      if (closest &&
+          link.getAttribute("href") === "#" + closest.id) {
+        link.classList.add("active");
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

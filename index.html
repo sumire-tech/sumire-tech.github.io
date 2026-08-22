@@ -162,7 +162,7 @@
       font-weight:500;
     }
 
-    .item a::after{
+    .item a[href]::after{
       content:"↗";
       margin-left:6px;
       font-size:13px;
@@ -172,7 +172,7 @@
       transition:0.2s ease;
     }
 
-    .item a:hover::after{
+    .item a[href]:hover::after{
       opacity:1;
       transform:translate(0,0);
     }
